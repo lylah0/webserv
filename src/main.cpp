@@ -1,27 +1,18 @@
-#include "ServerSocket.hpp"
-#include "ClientConnection.hpp"
+#include "PollServer.hpp"
 #include <iostream>
-#include <stdexcept>
 
-int main()
-{
+int main() {
     try {
-        ServerSocket server(8080);
-        std::cout << "Listening on port : 8080" << std::endl;
-        while (true) {
-            try {
-                int clientFd = server.acceptClient();
-                ClientConnection client(clientFd);
-                client.handle();
-            }
-            catch (const std::exception &e) {
-                std::cerr << "Client error: " << e.what() << std::endl;
-            }
-        }
+        std::vector<int> ports;
+        ports.push_back(8080);
+        PollServer server(ports);
+        std::cout << "Listening on port 8080" << std::endl;
+        server.run();
     }
-    catch (const std::exception &e) {
+    catch (const std::exception& e) {
         std::cerr << "Fatal server error: " << e.what() << std::endl;
         return 1;
     }
+
     return 0;
 }

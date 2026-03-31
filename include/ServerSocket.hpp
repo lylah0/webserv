@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <errno.h>
 
 class ServerSocket
 {
@@ -16,8 +17,6 @@ class ServerSocket
         struct sockaddr_in _addr;
     public :
         ServerSocket(int port);
-        ~ServerSocket();
-
         int getFd() const;
         int acceptClient() const;
 };
