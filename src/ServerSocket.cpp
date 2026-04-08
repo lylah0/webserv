@@ -33,12 +33,19 @@ ServerSocket::ServerSocket(int port)
     }
 }
 
-ServerSocket::~ServerSocket()
-{
-    close(_fd);
-}
-
 int ServerSocket::getFd() const
 {
     return _fd;
+}
+
+int ServerSocket::acceptClient() const
+{
+    int client = accept(_fd, NULL, NULL);
+    if (client < 0)
+    {
+        if (errno == EAGAIN || errno == EWOULDBLOCK)
+            return -1;
+        throw std::runtime_error("accept() failed");
+    }
+    return client;
 }
