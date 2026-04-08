@@ -1,27 +1,28 @@
-#include "ServerSocket.hpp"
-#include "ClientConnection.hpp"
 #include <iostream>
-#include <stdexcept>
+#include "PollServer.hpp"
+#include "Parser.hpp"
+#include <iostream>
 
-int main()
-{
+int main(int argc, char **argv) {
     try {
-        ServerSocket server(8080);
-        std::cout << "Listening on port : 8080" << std::endl;
-        while (true) {
-            try {
-                int clientFd = server.acceptClient();
-                ClientConnection client(clientFd);
-                client.handle();
-            }
-            catch (const std::exception &e) {
-                std::cerr << "Client error: " << e.what() << std::endl;
-            }
+        ConfigParser parser(argc, argv);
+        parser.parse();
+
+        const std::vector<ServerConfig> &servers = parser.getServers();
+
+        for (size_t i = 0; i < servers.size(); ++i) {
+            const ServerConfig &s = servers[i];
+            std::cout << "---- SERVER " << i << " ----\n";
+            std::cout << "server_name: " << s.server_name << "\n";
+            std::cout << "listen: " << s.listen << "\n";
+            std::cout << "host: " << s.host << "\n";
+            std::cout << "root: " << s.root << "\n";
+            std::cout << "index: " << s.index << "\n";
+            std::cout << "client_max_body_size: " << s.client_max_body_size << "\n";
+            std::cout << "error_page: " << s.error_page << "\n";
         }
     }
-    catch (const std::exception &e) {
-        std::cerr << "Fatal server error: " << e.what() << std::endl;
-        return 1;
+    catch (std::exception &e) {
+        std::cerr << "Error: " << e.what() << "\n";
     }
-    return 0;
 }

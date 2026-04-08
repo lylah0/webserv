@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <fcntl.h>
 
 class ServerSocket
 {
@@ -19,7 +20,6 @@ class ServerSocket
         ~ServerSocket();
 
         int getFd() const;
-        int acceptClient() const;
 };
 
 #endif

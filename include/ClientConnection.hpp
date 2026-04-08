@@ -1,22 +1,28 @@
 #ifndef CLIENTCONNECTION_HPP
 #define CLIENTCONNECTION_HPP
 
-#include "ClientConnection.hpp"
-#include <stdexcept>
-#include <cstring>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <iostream>
+#include <string>
 
-class ClientConnection
-{
-    private :
-        int _fd;
-    public :
-        ClientConnection(int fd);
-        ~ClientConnection();
+class ClientConnection {
+public:
+    ClientConnection(int fd);
+    ~ClientConnection();
 
-        void handle();
+    bool handleRead();
+    bool handleWrite();
+
+    int getFd() const;
+    void prepareResponse(const std::string &resp);
+    std::string &getReadBuffer();
+    const std::string &getWriteBuffer() const;
+    size_t getWriteOffset() const;
+    void setWriteOffset(size_t off);
+
+private:
+    int _fd;
+    std::string _readBuf;
+    std::string _writeBuf;
+    size_t _writeOffset;
 };
 
 #endif
