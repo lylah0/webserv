@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 19:15:42 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/14 16:32:19 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/04/27 16:28:36 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,14 @@ ClientConnection::ClientConnection(int fd) : _fd(fd), _writeOffset(0){}
 
 ClientConnection::~ClientConnection(){
 	close(_fd);
+}
+
+std::string	ClientConnection::getBuffer() const{
+	return (_writeBuffer);
+}
+
+size_t	ClientConnection::getOffset() const{
+	return (_writeOffset);
 }
 
 int	ClientConnection::getFd() const{

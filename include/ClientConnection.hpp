@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 18:27:14 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/14 15:57:48 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/04/27 16:26:23 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ class	ClientConnection{
 		ClientConnection(int fd);
 		~ClientConnection();
 
+		std::string				getBuffer() const;
+		size_t					getOffset() const;
 		int						getFd() const;
 		std::string const&		getReadBuffer() const;
 		bool					handleRead();
