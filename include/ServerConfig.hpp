@@ -1,27 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
+/*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/13 13:31:53 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/13 15:56:51 by lylrandr         ###   ########.fr       */
+/*   Created: 2026/04/09 17:23:56 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/04/09 17:24:57 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#ifndef SERVERCONFIG_HPP
+#define SERVERCONFIG_HPP
 
-# include <string>
-# include <map>
+#include <string>
+#include <vector>
 
-struct HttpRequest{
-	std::string							method;
-	std::string							uri;
-	std::string							version;
-	std::map<std::string, std::string>	headers;
-	std::string							body;
+struct ServerConfig {
+	std::string	server_name;
+	int			listen;
+	std::string	host;
+	std::string	root;
+	std::string	index;
+	size_t		client_max_body_size;
+	std::string	error_page;
 };
 
 #endif

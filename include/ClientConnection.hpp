@@ -1,28 +1,41 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ClientConnection.hpp                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/13 18:27:14 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/04/14 15:57:48 by lylrandr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef CLIENTCONNECTION_HPP
 #define CLIENTCONNECTION_HPP
 
-#include <string>
+# include <string>
+# include <map>
+# include <unistd.h>
+# include <sys/socket.h>
 
-class ClientConnection {
-public:
-    ClientConnection(int fd);
-    ~ClientConnection();
+class	ClientConnection{
+	private :
+		int			_fd;
+		std::string	_readBuffer;
+		std::string	_writeBuffer;
+		size_t		_writeOffset;
 
-    bool handleRead();
-    bool handleWrite();
+		ClientConnection(ClientConnection const &src);
+		ClientConnection&	operator=(ClientConnection const &rhs);
+	public :
+		ClientConnection(int fd);
+		~ClientConnection();
 
-    int getFd() const;
-    void prepareResponse(const std::string &resp);
-    std::string &getReadBuffer();
-    const std::string &getWriteBuffer() const;
-    size_t getWriteOffset() const;
-    void setWriteOffset(size_t off);
-
-private:
-    int _fd;
-    std::string _readBuf;
-    std::string _writeBuf;
-    size_t _writeOffset;
+		int						getFd() const;
+		std::string const&		getReadBuffer() const;
+		bool					handleRead();
+		bool					handleWrite();
+		void					prepResponse(std::string const &response);
 };
 
 #endif

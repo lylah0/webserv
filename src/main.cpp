@@ -1,28 +1,37 @@
-#include <iostream>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/09 14:54:32 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/04/27 02:13:41 by lylrandr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "SocketUtils.hpp"
+#include "ServerSocket.hpp"
 #include "PollServer.hpp"
-#include "Parser.hpp"
-#include <iostream>
 
-int main(int argc, char **argv) {
-    try {
-        ConfigParser parser(argc, argv);
-        parser.parse();
+int main(int ac, char **av){
+	(void)av;
+	if (ac != 2){
+		std::cerr << "Usage: <./webserv config.conf>" << std::endl;
+		return (1);
+	}
+	try {
+		ServerConfig config;
+		config.listen = 8080;
 
-        const std::vector<ServerConfig> &servers = parser.getServers();
-
-        for (size_t i = 0; i < servers.size(); ++i) {
-            const ServerConfig &s = servers[i];
-            std::cout << "---- SERVER " << i << " ----\n";
-            std::cout << "server_name: " << s.server_name << "\n";
-            std::cout << "listen: " << s.listen << "\n";
-            std::cout << "host: " << s.host << "\n";
-            std::cout << "root: " << s.root << "\n";
-            std::cout << "index: " << s.index << "\n";
-            std::cout << "client_max_body_size: " << s.client_max_body_size << "\n";
-            std::cout << "error_page: " << s.error_page << "\n";
-        }
-    }
-    catch (std::exception &e) {
-        std::cerr << "Error: " << e.what() << "\n";
-    }
+		PollServer pollServer;
+		pollServer.addServer(config);
+		std::cout << "Server listening on port 8080" << std::endl;
+		pollServer.runServer();
+	}
+	catch (std::exception &e){
+		std::cerr << e.what() << std::endl;
+		return (1);
+	}
+	return (0);
 }
