@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 16:50:23 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/27 02:02:09 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/04/27 13:53:12 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class PollServer{
 		void								_removeFd(int fd);
 		void								_newConnection(int serverFd);
 		void								_clientEvent(size_t index);
+		void								_enableWrite(int fd);
 
 	public :
 		PollServer();

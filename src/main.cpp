@@ -6,16 +6,18 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 14:54:32 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/27 02:13:41 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/04/27 13:52:14 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "SocketUtils.hpp"
 #include "ServerSocket.hpp"
 #include "PollServer.hpp"
+#include <signal.h>
 
 int main(int ac, char **av){
 	(void)av;
+	signal(SIGPIPE, SIG_IGN);
 	if (ac != 2){
 		std::cerr << "Usage: <./webserv config.conf>" << std::endl;
 		return (1);
@@ -34,4 +36,4 @@ int main(int ac, char **av){
 		return (1);
 	}
 	return (0);
-}
+}	

@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/27 02:23:27 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/04/27 14:14:32 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,17 @@ void	PollServer::_clientEvent(size_t index){
 		_removeFd(clientFd);
 		return;
 	}
+	std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello World!\n";
+	_clients[clientFd]->prepResponse(response);
+	_enableWrite(clientFd);
+}
+
+void	PollServer::_enableWrite(int fd){
+	for(size_t i = 0; i < _fds.size(); i++){
+		if(_fds[i].fd == fd){
+			_fds[i].events |= POLLOUT;
+		}
+	}
 }
 
 void	PollServer::addServer(ServerConfig const &server){
@@ -99,6 +110,10 @@ void	PollServer::runServer(){
 			else{
 				if (_fds[i].revents & POLLIN)
 					_clientEvent(i);
+				if (_fds[i].revents & POLLOUT){
+					clientFd = _fds[i].fd;
+					_clients[clientFd]->handleWrite();
+				}
 				if (_fds[i].revents & (POLLERR | POLLHUP)){
 					clientFd = _fds[i].fd;
 					delete _clients[clientFd];
