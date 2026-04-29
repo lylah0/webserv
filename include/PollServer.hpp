@@ -1,42 +1,47 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   PollServer.hpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/14 16:50:23 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/04/29 12:12:58 by cjauregu         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef POLLSERVER_HPP
 #define POLLSERVER_HPP
 
-#include <vector>
-#include <map>
-#include <poll.h>
-#include <unistd.h>
-#include "ServerSocket.hpp"
-#include "ClientConnection.hpp"
-#include "ClientState.hpp"
-#include "HttpResponse.hpp"
-#include "HttpRequest.hpp"
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
-#include <cstdlib>
-#include <string>
+# include "ClientState.hpp"
+# include "ClientConnection.hpp"
+# include "ServerSocket.hpp"
+# include <poll.h>
+# include <vector>
+# include <map>
 
-class PollServer
-{
-    private :
-        std::vector<ServerSocket> _listeners;
-        std::vector<pollfd> _fds;
-        std::map<int, ClientConnection*>    _clients;
-        std::map<int, ClientState> _states;
-        
-        void addListener(int port);
-        void addFd(int fd, short events);
-        void removeFd(size_t index);
-        void handleNewConnection(size_t index);
-        void handleClientEvent(size_t index);
-    public :
-        PollServer(const std::vector<int>& ports);
-        ~PollServer();
+class PollServer{
+	private :
+		std::vector<pollfd>					_fds;
+		std::vector<ServerSocket*> _servers;
+		std::map<int, ClientConnection*>	_clients;
+		std::map<int, ClientState>			_states;
 
-        void parseHeaders(ClientState& state);
-        void parseRequest(int fd, ClientState& state);
-        void processRequest(int fd, ClientState& state);
-        void run();
+		PollServer(const PollServer &src);
+		PollServer&							operator=(const PollServer &rhs);
+		void								_addFd(int fd);
+		void								_removeFd(int fd);
+		void								_newConnection(int serverFd);
+		void								_clientEvent(size_t index);
+		void								_enableWrite(int fd);
+		void								_disableWrite(int fd);
+
+	public :
+		PollServer();
+		~PollServer();
+
+		void	addServer(ServerConfig const &server);
+		void	runServer();
 };
 
 #endif

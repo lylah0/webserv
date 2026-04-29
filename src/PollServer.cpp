@@ -1,191 +1,140 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   PollServer.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/04/29 12:10:59 by cjauregu         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "PollServer.hpp"
+#include "Parser.hpp"
 
-PollServer::PollServer(const std::vector<int>& ports)
-{
-    for (size_t i = 0; i < ports.size(); ++i)
-        addListener(ports[i]);
+PollServer::PollServer(){
+
 }
 
-PollServer::~PollServer()
-{
-    for (size_t i = 0; i < _fds.size(); ++i)
-        close(_fds[i].fd);
-    for (std::map<int, ClientConnection*>::iterator it = _clients.begin(); it != _clients.end(); it++)
-        delete it->second;
+PollServer::~PollServer(){
+	for (std::map<int, ClientConnection*>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		delete it->second;
+	for (size_t i = 0; i < _servers.size(); i++)
+		delete _servers[i];
 }
 
-void PollServer::addListener(int port)
-{
-    _listeners.push_back(ServerSocket(port));
-
-    pollfd p;
-    p.fd = _listeners.back().getFd();
-    p.events = POLLIN;
-    p.revents = 0;
-    _fds.push_back(p);
+void	PollServer::_addFd(int fd){
+	struct pollfd	pfd;
+	pfd.fd = fd;
+	pfd.events = POLLIN;
+	pfd.revents = 0;
+	_fds.push_back(pfd);
 }
 
-void PollServer::addFd(int fd, short events)
-{
-    pollfd p;
-    p.fd = fd;
-    p.events = events;
-    p.revents = 0;
-    _fds.push_back(p);
+void	PollServer::_removeFd(int fd){
+	for(size_t i = 0; i < _fds.size(); i++){
+		if (_fds[i].fd == fd){
+			close(_fds[i].fd);
+			_fds.erase(_fds.begin() + i);
+		}
+	}
 }
 
-void PollServer::removeFd(size_t index)
-{
-    close(_fds[index].fd);
-    _fds.erase(_fds.begin() + index);
+void	PollServer::_newConnection(int serverFd){
+	int	clientStatus;
+
+	clientStatus = 0;
+	for(size_t i = 0; i < _servers.size(); i++){
+		if (_servers[i]->getFd() == serverFd){
+			clientStatus =  _servers[i]->acceptClient();
+			if (clientStatus < 0)
+				return;
+			_addFd(clientStatus);
+			_clients[clientStatus] = new ClientConnection(clientStatus);
+			_states[clientStatus] = ClientState();
+		}
+	}
 }
 
-void PollServer::handleNewConnection(size_t index)
-{
-    int serverFd = _fds[index].fd;
+void	PollServer::_clientEvent(size_t index){
+	int	clientFd;
 
-    for (size_t i = 0; i < _listeners.size(); ++i)
-    {
-        if (_listeners[i].getFd() == serverFd)
-        {
-            int clientFd = _listeners[i].acceptClient();
-            if (clientFd < 0)
-                return;
-            addFd(clientFd, POLLIN);
-            _clients[clientFd] = new ClientConnection(clientFd);
-            _states[clientFd] = ClientState();
-        }
-    }
+	clientFd = _fds[index].fd;
+	if (_clients[clientFd]->handleRead() == false){
+		delete _clients[clientFd];
+		_clients.erase(clientFd);
+		_states.erase(clientFd);
+		_removeFd(clientFd);
+		return;
+	}
+	// HARDCODE : WILL REMOVE
+	std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello World!\n";
+	_clients[clientFd]->prepResponse(response);
+	_enableWrite(clientFd);
 }
 
-void parseRequestLine(const std::string& line, ClientState& state)
-{
-    std::istringstream ss(line);
-    ss >> state.method >> state.target >> state.version;
+void	PollServer::_enableWrite(int fd){
+	for(size_t i = 0; i < _fds.size(); i++){
+		if(_fds[i].fd == fd){
+			_fds[i].events |= POLLOUT;
+		}
+	}
 }
 
-void PollServer::parseHeaders(ClientState& state)
-{
-    std::string headerBlock = state.buffer.substr(0, state.headerEnd);
-
-    std::istringstream stream(headerBlock);
-    std::string line;
-
-    std::getline(stream, line);
-    parseRequestLine(line, state);
-    while (std::getline(stream, line) && line != "\r")
-    {
-        size_t colon = line.find(':');
-        if (colon == std::string::npos) continue;
-        std::string key = line.substr(0, colon);
-        std::string value = line.substr(colon + 1);
-        key.erase(key.find_last_not_of(" \t\r") + 1);
-        value.erase(0, value.find_first_not_of(" \t"));
-        value.erase(value.find_last_not_of(" \t\r") + 1);
-        state.headers[key] = value;
-    }
-    if (state.headers.count("Content-Length"))
-        state.contentLength = std::atoi(state.headers["Content-Length"].c_str());
-    else
-        state.contentLength = 0;
+void	PollServer::_disableWrite(int fd){
+	for (size_t i = 0; i < _fds.size(); i++){
+		if (_fds[i].fd == fd){
+			_fds[i].events &= ~POLLOUT;
+		}
+	}
 }
 
-void PollServer::parseRequest(int fd, ClientState& state)
-{
-    if (!state.headersComplete)
-    {
-        size_t pos = state.buffer.find("\r\n\r\n");
-        if (pos != std::string::npos)
-        {
-            state.headersComplete = true;
-            state.headerEnd = pos + 4;
-            parseHeaders(state);
-        }
-    }
-    if (state.headersComplete && !state.requestReady)
-    {
-        size_t bodySize = state.buffer.size() - state.headerEnd;
-        if (bodySize >= state.contentLength)
-        {
-            state.body = state.buffer.substr(state.headerEnd, state.contentLength);
-            state.requestReady = true;
-        }
-    }
-    if (state.requestReady)
-        processRequest(fd, state);
+void	PollServer::addServer(ServerConfig const &server){
+	int	fd;
+
+	_servers.push_back(new ServerSocket(server));
+	fd = _servers.back()->getFd();
+	_addFd(fd);
 }
 
-void PollServer::processRequest(int fd, ClientState& state)
-{
-    HttpRequest req;
-    req.method = state.method;
-    req.target = state.target;
-    req.version = state.version;
-    req.headers = state.headers;
-    req.body = state.body;
-    HttpResponse res;
-    res.statusCode = 200;
-    res.statusMessage = "OK";
-    res.body = "Hello from Webserv!\n";
-    std::stringstream ss;
-    ss << res.body.size();
-    res.headers["Content-Length"] = ss.str();
-    res.headers["Content-Type"] = "text/plain";
-    res.headers["Connection"] = "close";
-    std::stringstream response;
-    response << "HTTP/1.1 " << res.statusCode << " " << res.statusMessage << "\r\n";
-    std::map<std::string, std::string>::iterator it;
-    for (it = res.headers.begin(); it != res.headers.end(); ++it)
-        response << it->first << ": " << it->second << "\r\n";
-    response << "\r\n";
-    response << res.body;
-    std::string out = response.str();
-    send(fd, out.c_str(), out.size(), 0);
-    state = ClientState();
-}
+void	PollServer::runServer(){
+	bool	isServer;
+	int		ret;
+	int		clientFd;
 
-
-void PollServer::handleClientEvent(size_t index)
-{
-    int fd = _fds[index].fd;
-    ClientState& state = _states[fd];
-
-    char tmp[4096];
-    ssize_t n = recv(fd, tmp, sizeof(tmp), 0);
-
-    if (n <= 0)
-    {
-        delete _clients[fd];
-        _clients.erase(fd);
-        _states.erase(fd);
-        removeFd(index);
-        return;
-    }
-    state.buffer.append(tmp, n);
-    parseRequest(fd, state);
-}
-
-
-void PollServer::run()
-{
-    while (true)
-    {
-        int ret = poll(&_fds[0], _fds.size(), -1);
-        if (ret < 0)
-            throw std::runtime_error("poll() failed");
-        for (size_t i = 0; i < _fds.size(); ++i)
-        {
-            if (_fds[i].revents & POLLIN)
-            {
-                bool isListener = false;
-                for (size_t j = 0; j < _listeners.size(); ++j)
-                    if (_listeners[j].getFd() == _fds[i].fd)
-                        isListener = true;
-                if (isListener)
-                    handleNewConnection(i);
-                else
-                    handleClientEvent(i);
-            }
-        }
-    }
+	while(1){
+		ret = poll(_fds.data(), _fds.size(), -1);
+		if (ret < 0)
+			throw std::runtime_error("poll() failed");
+		for(size_t i = 0; i < _fds.size(); i++){
+			isServer = false;
+			for(size_t j = 0; j < _servers.size(); j++){
+				if (_servers[j]->getFd() == _fds[i].fd)
+					isServer = true;
+			}
+			if (isServer){
+				if (_fds[i].revents & POLLIN)
+					_newConnection(_fds[i].fd);
+			}
+			else{
+				if (_fds[i].revents & POLLIN)
+					_clientEvent(i);
+				if (_fds[i].revents & POLLOUT){
+					clientFd = _fds[i].fd;
+					_clients[clientFd]->handleWrite();
+					if (_clients[clientFd]->getOffset() >= _clients[clientFd]->getBuffer().size())
+						_disableWrite(_clients[clientFd]->getFd());
+				}
+				if (_fds[i].revents & (POLLERR | POLLHUP)){
+					clientFd = _fds[i].fd;
+					delete _clients[clientFd];
+					_clients.erase(clientFd);
+					_states.erase(clientFd);
+					_removeFd(clientFd);
+					break;
+				}
+			}
+		}
+	}
 }
