@@ -46,6 +46,60 @@ std::vector<std::string> tokenize(const std::string& text)
     return tokens;
 }
 
+LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
+{
+    LocationConfig loc;
+    loc.autoindex = false;
+    loc.upload_enabled = false;
+
+    if (tokens[i] != "location")
+        throw std::runtime_error("Expected 'location'");
+    ++i;
+    loc.path = tokens[i++];
+    if (tokens[i] != "{")
+        throw std::runtime_error("Expected '{' after location");
+    ++i;
+    while (tokens[i] != "}") {
+
+        std::string key = tokens[i++];
+        if (key == "allow_methods") {
+            while (tokens[i] != ";") {
+                loc.methods.push_back(tokens[i]);
+                ++i;
+            }
+            ++i;
+            continue;
+        }
+        if (key == "cgi") {
+            std::string ext = tokens[i++];
+            std::string interpreter = tokens[i++];
+            ++i;
+            loc.cgi[ext] = interpreter;
+            continue;
+        }
+        if (key == "upload_store") {
+            std::string value = tokens[i++];
+            loc.upload_store = value;
+            ++i;
+            loc.upload_enabled = true;
+            continue;
+        }
+        std::string value = tokens[i++];
+        std::cout << key << '\n' << value << std::endl;
+        if (tokens[i] != ";")
+            throw std::runtime_error("Expected ';'");
+        ++i;
+        if (key == "root") loc.root = value;
+        else if (key == "index") loc.index = value;
+        else if (key == "autoindex") loc.autoindex = (value == "on");
+        else if (key == "return") loc.redirect = value;
+        else
+            throw std::runtime_error("Unknown directive in location: " + key);
+    }    
+    ++i;
+    return loc;
+}
+
 void ConfigParser::parseTokens(const std::vector<std::string> &tokens) {
     size_t i = 0;
 
@@ -62,6 +116,12 @@ void ConfigParser::parseTokens(const std::vector<std::string> &tokens) {
         cfg.client_max_body_size = 0;
 
         while (i < tokens.size() && tokens[i] != "}") {
+            if (tokens[i] == "location")
+            {
+                LocationConfig loc = parseLocation(tokens, i);
+                cfg.locations.push_back(loc);
+                continue;
+            }
             std::string key = tokens[i++];
             if (i >= tokens.size())
                 throw std::runtime_error("Unexpected end of file");

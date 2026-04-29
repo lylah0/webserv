@@ -10,6 +10,18 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+struct LocationConfig {
+    std::string              path;
+    std::vector<std::string> methods;
+    std::string              root;
+    std::string              index;
+    bool                     autoindex;
+    std::string              upload_store;
+    bool                     upload_enabled;
+    std::string              redirect;
+    std::map<std::string, std::string> cgi;
+};
+
 struct ServerConfig {
     std::string server_name;
     int listen;
@@ -18,6 +30,7 @@ struct ServerConfig {
     std::string index;
     size_t client_max_body_size;
     std::string error_page;
+    std::vector<LocationConfig> locations;
 };
 
 class ConfigParser
