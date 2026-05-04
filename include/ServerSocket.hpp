@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 14:59:52 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/14 16:42:09 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/04 11:01:27 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,3 +35,4 @@ class ServerSocket {
 };
 
 #endif
+

@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 14:56:17 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/14 16:46:51 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/04 10:57:00 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,12 @@ ServerSocket::~ServerSocket(){
 
 int	ServerSocket::getFd() const{
 	return (this->_fd);
+int	ServerSocket::getFd() const{
+	return (this->_fd);
 }
 
+int	ServerSocket::acceptClient() const{
+	return (accept(_fd, NULL, NULL));
 int	ServerSocket::acceptClient() const{
 	return (accept(_fd, NULL, NULL));
 }
