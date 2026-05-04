@@ -9,14 +9,14 @@
 
 class ConfigParser
 {
-    private :
-        std::string filename;
-        std::vector<ServerConfig> servers;
-    public :
-        ConfigParser(int argc, char** argv);
-        void parse();
-        const std::vector<ServerConfig>& getServers() const;
-        void parseTokens(const std::vector<std::string> &tokens);
+	private :
+		std::string filename;
+		std::vector<ServerConfig> servers;
+	public :
+		ConfigParser(int argc, char** argv);
+		void parse();
+		const std::vector<ServerConfig>& getServers() const;
+		void parseTokens(const std::vector<std::string> &tokens);
 };
 
 #endif

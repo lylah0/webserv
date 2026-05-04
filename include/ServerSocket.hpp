@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   ServerSocket.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 14:59:52 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/29 12:10:15 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/05/04 11:01:27 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVERSOCKET_HPP
 #define SERVERSOCKET_HPP
 
+# include "ServerConfig.hpp"
 # include "Parser.hpp"
 # include "SocketUtils.hpp"
 # include <sys/socket.h>
@@ -34,3 +35,4 @@ class ServerSocket {
 };
 
 #endif
+

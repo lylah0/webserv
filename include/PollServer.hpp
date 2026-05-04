@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PollServer.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 16:50:23 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/29 12:12:58 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/05/04 11:06:42 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 # include "ClientState.hpp"
 # include "ClientConnection.hpp"
 # include "ServerSocket.hpp"
+# include "HttpRequest.hpp"
+# include "HttpResponse.hpp"
+# include "HttpHandler.hpp"
 # include <poll.h>
 # include <vector>
 # include <map>
@@ -23,7 +26,7 @@
 class PollServer{
 	private :
 		std::vector<pollfd>					_fds;
-		std::vector<ServerSocket*> _servers;
+		std::vector<ServerSocket*>			_servers;
 		std::map<int, ClientConnection*>	_clients;
 		std::map<int, ClientState>			_states;
 
@@ -45,3 +48,4 @@ class PollServer{
 };
 
 #endif
+

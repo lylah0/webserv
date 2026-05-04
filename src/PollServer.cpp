@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PollServer.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/29 12:10:59 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/05/04 10:59:37 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #include "Parser.hpp"
 
 PollServer::PollServer(){
-
 }
 
 PollServer::~PollServer(){
@@ -58,7 +57,9 @@ void	PollServer::_newConnection(int serverFd){
 }
 
 void	PollServer::_clientEvent(size_t index){
-	int	clientFd;
+	int			clientFd;
+	std::string	buffer;
+	HttpRequest	request;
 
 	clientFd = _fds[index].fd;
 	if (_clients[clientFd]->handleRead() == false){
@@ -68,6 +69,8 @@ void	PollServer::_clientEvent(size_t index){
 		_removeFd(clientFd);
 		return;
 	}
+	buffer = _clients[clientFd]->getReadBuffer();
+	// request	 = parseRequest(buffer);
 	// HARDCODE : WILL REMOVE
 	std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello World!\n";
 	_clients[clientFd]->prepResponse(response);

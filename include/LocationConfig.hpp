@@ -1,30 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
+/*   LocationConfig.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/13 13:31:53 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/04 10:41:10 by lylrandr         ###   ########.fr       */
+/*   Created: 2026/04/27 18:26:25 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/05/04 11:05:19 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#ifndef LOCATIONCONFIG_HPP
+#define LOCATIONCONFIG_HPP
 
+# include <vector>
 # include <string>
 # include <map>
-# include <string>
-# include <map>
+# include <iostream>
 
-struct HttpRequest{
-	std::string							method;
-	std::string							uri;
-	std::string							version;
-	std::string							body;
-	std::map<std::string, std::string>	headers;
+struct LocationConfig {
+	bool								upload_enabled;
+	bool								autoindex;
+	std::string							upload_store;
+	std::string							path;
+	std::string							root;
+	std::string							index;
+	std::string							redirect;
+	std::vector<std::string>			methods;
+	std::map<std::string, std::string>	cgi;
 };
 
 #endif
-

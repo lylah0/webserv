@@ -1,30 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
+/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/13 13:31:53 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/04 10:41:10 by lylrandr         ###   ########.fr       */
+/*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/05/04 10:36:42 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#include "HttpHandler.hpp"
 
-# include <string>
-# include <map>
-# include <string>
-# include <map>
+// HttpRequest	parseRequest(std::string const &buffer){
+// 	// std::string
+// 	(void)buffer;
+// }
 
-struct HttpRequest{
-	std::string							method;
-	std::string							uri;
-	std::string							version;
-	std::string							body;
-	std::map<std::string, std::string>	headers;
-};
+// LocationConfig	route(HttpRequest const &req, ServerConfig const &config){
+// 	(void)req;
+// 	(void)config;
+// }
 
-#endif
-
+// HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
+// 	(void)req;
+// 	(void)loc;
+// }

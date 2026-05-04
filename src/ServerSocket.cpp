@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ServerSocket.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 14:56:17 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/29 12:11:54 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/05/04 11:05:36 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerSocket.hpp"
-#include "Parser.hpp"
 
 //create socket, autorize reuse of port, bind fd to wanted port
 //listen, returns usable fd
