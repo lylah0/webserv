@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/27 18:26:25 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/29 18:16:12 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/04 11:05:19 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,12 @@
 # include <vector>
 # include <string>
 # include <map>
+# include <iostream>
 
 struct LocationConfig {
+	bool								upload_enabled;
 	bool								autoindex;
+	std::string							upload_store;
 	std::string							path;
 	std::string							root;
 	std::string							index;
