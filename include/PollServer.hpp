@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 16:50:23 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/27 14:23:53 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/04/29 18:40:26 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 # include "ClientState.hpp"
 # include "ClientConnection.hpp"
 # include "ServerSocket.hpp"
+# include "HttpRequest.hpp"
+# include "HttpResponse.hpp"
+# include "HttpHandler.hpp"
 # include <poll.h>
 # include <vector>
 # include <map>

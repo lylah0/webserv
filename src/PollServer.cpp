@@ -6,14 +6,13 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/27 16:35:22 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/04/29 18:40:32 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "PollServer.hpp"
 
 PollServer::PollServer(){
-
 }
 
 PollServer::~PollServer(){
@@ -57,7 +56,9 @@ void	PollServer::_newConnection(int serverFd){
 }
 
 void	PollServer::_clientEvent(size_t index){
-	int	clientFd;
+	int			clientFd;
+	std::string	buffer;
+	HttpRequest	request;
 
 	clientFd = _fds[index].fd;
 	if (_clients[clientFd]->handleRead() == false){
@@ -67,10 +68,12 @@ void	PollServer::_clientEvent(size_t index){
 		_removeFd(clientFd);
 		return;
 	}
+	buffer = _clients[clientFd]->getReadBuffer();
+	request	 = parseRequest(buffer);
 	// HARDCODE : WILL REMOVE
-	std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello World!\n";
-	_clients[clientFd]->prepResponse(response);
-	_enableWrite(clientFd);
+	// std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello World!\n";
+	// _clients[clientFd]->prepResponse(response);
+	// _enableWrite(clientFd);
 }
 
 void	PollServer::_enableWrite(int fd){

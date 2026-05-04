@@ -1,27 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
+/*   LocationConfig.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/13 13:31:53 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/29 18:46:15 by lylrandr         ###   ########.fr       */
+/*   Created: 2026/04/27 18:26:25 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/04/29 18:16:12 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#ifndef LOCATIONCONFIG_HPP
+#define LOCATIONCONFIG_HPP
 
+# include <vector>
 # include <string>
 # include <map>
 
-struct HttpRequest{
-	std::string							method;
-	std::string							uri;
-	std::string							version;
-	std::string							body;
-	std::map<std::string, std::string>	headers;
+struct LocationConfig {
+	bool								autoindex;
+	std::string							path;
+	std::string							root;
+	std::string							index;
+	std::string							redirect;
+	std::vector<std::string>			methods;
+	std::map<std::string, std::string>	cgi;
 };
 
 #endif

@@ -1,27 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
+/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/13 13:31:53 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/29 18:46:15 by lylrandr         ###   ########.fr       */
+/*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/04/29 18:47:45 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#include "HttpHandler.hpp"
 
-# include <string>
-# include <map>
+HttpRequest	parseRequest(std::string const &buffer){
+	std::string
+}
 
-struct HttpRequest{
-	std::string							method;
-	std::string							uri;
-	std::string							version;
-	std::string							body;
-	std::map<std::string, std::string>	headers;
-};
+LocationConfig	route(HttpRequest const &req, ServerConfig const &config){
 
-#endif
+}
+
+HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
+
+}
