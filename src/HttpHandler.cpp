@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/06 14:13:37 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/12 14:58:57 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,17 @@ HttpRequest	parseRequest(std::string const &buffer){
 	return (req);
 }
 
-// LocationConfig	route(HttpRequest const &req, ServerConfig const &config){
-// 	(void)req;
-// 	(void)config;
-// }
+LocationConfig	route(HttpRequest const &req, ServerConfig const &config){
+	LocationConfig	loc;
+
+	for (size_t i = 0; i < config.locations.size(); i++){
+		if (req.uri.find(config.locations[i].path) == 0){
+			if (loc.path.empty() || config.locations[i].path.size() > loc.path.size())
+					loc = config.locations[i];
+			}
+		}
+	return(loc);
+}
 
 // HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
 // 	(void)req;
