@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:17:37 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/29 18:29:07 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/06 13:11:31 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #define HTTPHANDLER_HPP
 
 # include <string>
+# include <iostream>
+# include <sstream>
 # include "HttpRequest.hpp"
 # include "LocationConfig.hpp"
 # include "HttpResponse.hpp"

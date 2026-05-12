@@ -6,7 +6,7 @@
 /*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/06 19:54:48 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/05/07 12:15:38 by cjauregu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void	PollServer::_clientEvent(size_t index, const std::vector<ServerConfig> &ser
 		return;
 	}
 	buffer = _clients[clientFd]->getReadBuffer();
-	// request	 = parseRequest(buffer);
+	request	 = parseRequest(buffer);
 	// HARDCODE : WILL REMOVE
 	size_t serverIndex = _clientServerIndex[clientFd];
 	_clients[clientFd]->prepResponse(servers[serverIndex]);
