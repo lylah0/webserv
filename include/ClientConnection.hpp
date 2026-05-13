@@ -6,7 +6,7 @@
 /*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 18:27:14 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/06 19:53:46 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/05/12 21:45:00 by cjauregu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ class	ClientConnection{
 		std::string const&		getReadBuffer() const;
 		bool					handleRead();
 		bool					handleWrite();
-		void					prepResponse(const ServerConfig &conf);
+		void					prepResponse(const std::string &body);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/07 12:15:38 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/05/12 21:49:42 by cjauregu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,15 +52,15 @@ void	PollServer::_newConnection(int serverFd){
 			_addFd(clientStatus);
 			_clients[clientStatus] = new ClientConnection(clientStatus);
 			_states[clientStatus] = ClientState();
-			_clientServerIndex[clientStatus] = i;
+			_clientConfig[clientStatus] = _configs[i];
 		}
 	}
 }
 
-void	PollServer::_clientEvent(size_t index, const std::vector<ServerConfig> &servers){
-	int			clientFd;
-	std::string	buffer;
-	HttpRequest	request;
+void	PollServer::_clientEvent(size_t index){
+	int				clientFd;
+	std::string		buffer;
+	HttpRequest		request;
 
 	clientFd = _fds[index].fd;
 	if (_clients[clientFd]->handleRead() == false){
@@ -72,9 +72,12 @@ void	PollServer::_clientEvent(size_t index, const std::vector<ServerConfig> &ser
 	}
 	buffer = _clients[clientFd]->getReadBuffer();
 	request	 = parseRequest(buffer);
+	LocationConfig loc = route(request, _clientConfig[clientFd]);
+	std::string fullpath = resolvePath(request, _clientConfig[clientFd], loc);
+	std::string response = serveFile(fullpath);
 	// HARDCODE : WILL REMOVE
-	size_t serverIndex = _clientServerIndex[clientFd];
-	_clients[clientFd]->prepResponse(servers[serverIndex]);
+	// std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello World!\n";
+	_clients[clientFd]->prepResponse(response);
 	_enableWrite(clientFd);
 }
 
@@ -97,12 +100,13 @@ void	PollServer::_disableWrite(int fd){
 void	PollServer::addServer(ServerConfig const &server){
 	int	fd;
 
+	_configs.push_back(server);
 	_servers.push_back(new ServerSocket(server));
 	fd = _servers.back()->getFd();
 	_addFd(fd);
 }
 
-void	PollServer::runServer(const std::vector<ServerConfig> &servers){
+void	PollServer::runServer(){
 	bool	isServer;
 	int		ret;
 	int		clientFd;
@@ -123,7 +127,7 @@ void	PollServer::runServer(const std::vector<ServerConfig> &servers){
 			}
 			else{
 				if (_fds[i].revents & POLLIN)
-					_clientEvent(i, servers);
+					_clientEvent(i);
 				if (_fds[i].revents & POLLOUT){
 					clientFd = _fds[i].fd;
 					_clients[clientFd]->handleWrite();

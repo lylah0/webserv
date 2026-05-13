@@ -85,7 +85,7 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
             continue;
         }
         std::string value = tokens[i++];
-        std::cout << key << '\n' << value << std::endl;
+        //std::cout << key << '\n' << value << std::endl;
         if (tokens[i] != ";")
             throw std::runtime_error("Expected ';'");
         ++i;
