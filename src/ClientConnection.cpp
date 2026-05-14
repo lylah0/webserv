@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientConnection.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 19:15:42 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/12 21:53:05 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/05/14 15:30:36 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,17 @@ bool	ClientConnection::handleWrite(){
 	return (true);
 }
 
-void	ClientConnection::prepResponse(const std::string &body)
+void ClientConnection::prepResponse(const HttpResponse &response)
 {
-	_writeBuffer = body;
+	std::ostringstream out;
+
+	out << "HTTP/1.1 " << response.statusCode << " " << response.statusMessage << "\r\n";
+	for (std::map<std::string, std::string>::const_iterator it = response.headers.begin();
+			it != response.headers.end(); it++)
+		out << it->first << ": " << it->second << "\r\n";
+	out << "\r\n";
+	out << response.body;
+
+	_writeBuffer = out.str();
 	_writeOffset = 0;
 }
