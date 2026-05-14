@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/12 15:05:54 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/14 14:19:18 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,10 +73,12 @@ void	PollServer::_clientEvent(size_t index){
 	buffer = _clients[clientFd]->getReadBuffer();
 	request	 = parseRequest(buffer);
 	LocationConfig loc = route(request, _clientConfig[clientFd]);
+	std::string fullpath = resolvePath(request, _clientConfig[clientFd], loc);
+	std::string response = serveFile(fullpath);
 	// HARDCODE : WILL REMOVE
 	// std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello World!\n";
-	// _clients[clientFd]->prepResponse(response);
-	// _enableWrite(clientFd);
+	_clients[clientFd]->prepResponse(response);
+	_enableWrite(clientFd);
 }
 
 void	PollServer::_enableWrite(int fd){

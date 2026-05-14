@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientConnection.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
+/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 19:15:42 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/04/27 16:28:36 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/12 21:53:05 by cjauregu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,8 @@ bool	ClientConnection::handleWrite(){
 	return (true);
 }
 
-void	ClientConnection::prepResponse(std::string const &response){
-	_writeBuffer = response;
+void	ClientConnection::prepResponse(const std::string &body)
+{
+	_writeBuffer = body;
 	_writeOffset = 0;
 }

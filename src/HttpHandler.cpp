@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/14 13:20:48 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/14 14:18:17 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,11 +71,10 @@ HttpResponse	handleGet(HttpRequest const &request, LocationConfig const &locatio
 			response.statusCode = 404;
 			return (response);
 		}
-		
+
 	}
 	return (response);
 }
-
 
 HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
 	bool			allowed;
@@ -100,3 +99,78 @@ HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
 	else if (req.method == "DELETE")
 		return (handleDelete(req, loc, path));
 }
+std::string resolvePath(const HttpRequest &req, ServerConfig const &server, const LocationConfig &loc)
+{
+	std::string root;
+	if (!loc.root.empty())
+		root = loc.root;
+	else
+		root = server.root;
+	std::string localUri = req.uri;
+	if (!loc.path.empty() && loc.path != "/")
+	{
+		if (req.uri.find(loc.path) == 0)
+			localUri = req.uri.substr(loc.path.length());
+	}
+	if (localUri.empty() || localUri == "/")
+        localUri = "/" + (loc.index.empty() ? server.index : loc.index);
+	return root + localUri;
+}
+
+std::string getMimeType(const std::string& path)
+{
+	size_t dot = path.find_last_of('.');
+	if (dot == std::string::npos)
+		return "application/octet-stream";
+	std::string ext = path.substr(dot + 1);
+	std::cout << "Extension : " << ext << std::endl;
+
+    if (ext == "html") return "text/html";
+    if (ext == "css")  return "text/css";
+    if (ext == "js")   return "application/javascript";
+    if (ext == "png")  return "image/png";
+    if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
+    if (ext == "gif")  return "image/gif";
+    if (ext == "ico")  return "image/x-icon";
+    if (ext == "txt")  return "text/plain";
+
+	return "application/octet-stream";
+}
+
+std::string serveFile(const std::string &fullPath)
+{
+	int fd = open(fullPath.c_str(), O_RDONLY);
+	if (fd < 0) {
+        // File not found, return 404
+        std::string body = "<h1>404 Not Found</h1>";
+        std::ostringstream out;
+        out << "HTTP/1.1 404 Not Found\r\n";
+        out << "Content-Length: " << body.size() << "\r\n";
+        out << "Content-Type: text/html\r\n";
+        out << "Connection: close\r\n\r\n";
+        out << body;
+        return out.str();
+    }
+	std::string body;
+	char buf[4096];
+	ssize_t bytes;
+
+	while ((bytes = read(fd, buf, sizeof(buf))) > 0)
+		body.append(buf, bytes);
+	close(fd);
+	std::ostringstream out;
+	std::string mime = getMimeType(fullPath);
+	std::cout << "Mime Type " << mime << std::endl;
+	out << "HTTP/1.1 200 OK\r\n";
+	out << "Content-Length: " << body.size() << "\r\n";
+	out << "Content-Type: " << mime << "\r\n";
+	out << "Connection: close\r\n\r\n";
+    out << body;
+
+	return out.str();
+}
+
+// HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
+// 	(void)req;
+// 	(void)loc;
+// }

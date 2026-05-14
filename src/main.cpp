@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 14:54:32 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/12 15:25:58 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/14 14:18:39 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@ int main(int ac, char **av){
 		PollServer pollServer;
 		for (size_t i = 0; i < servers.size(); i++)
 			pollServer.addServer(servers[i]);
-		std::cout << "Server listening..." << std::endl;
+		for (size_t i = 0; i < servers.size(); i++)
+			std::cout << "Server " << servers[i].server_name << " listening on : " << servers[i].listen << std::endl;
 		pollServer.runServer();
 	}
 	catch (std::exception &e){
