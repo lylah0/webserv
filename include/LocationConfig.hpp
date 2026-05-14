@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/27 18:26:25 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/04 11:05:19 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/13 10:35:00 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ struct LocationConfig {
 	std::string							root;
 	std::string							index;
 	std::string							redirect;
-	std::vector<std::string>			methods;
+	std::vector<std::string>			methods; 
 	std::map<std::string, std::string>	cgi;
 };
 
