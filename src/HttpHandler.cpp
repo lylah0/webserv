@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/14 14:18:17 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/14 14:52:02 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,57 +48,29 @@ LocationConfig	route(HttpRequest const &req, ServerConfig const &config){
 	return(loc);
 }
 
-std::string	buildPath(HttpRequest const &req, LocationConfig const &loc){
-	(void)loc;
-	(void)req;
-}
+// HttpResponse	handleGet(HttpRequest const &request, LocationConfig const &location, std::string path){
+// 	HttpResponse	response;
+// 	struct stat		fileInfo;
 
-HttpResponse	handleGet(HttpRequest const &request, LocationConfig const &location, std::string path){
-	HttpResponse	response;
-	struct stat		fileInfo;
+// 	if (stat(path.c_str(), &fileInfo)){
+// 		response.statusCode = 404;
+// 		response.statusMessage = "path not found";
+// 		return(response);
+// 	}
+// 	if (S_ISDIR(fileInfo.st_mode))
+// 		return;
+// 		//listing
+// 	else if (S_ISREG(fileInfo.st_mode)){
+// 		if (access(path.c_str(), fileInfo.st_mode)){
+// 			response.statusMessage = "no access to file";
+// 			response.statusCode = 404;
+// 			return (response);
+// 		}
 
-	if (stat(path.c_str(), &fileInfo)){
-		response.statusCode = 404;
-		response.statusMessage = "path not found";
-		return(response);
-	}
-	if (S_ISDIR(fileInfo.st_mode))
-		return;
-		//listing
-	else if (S_ISREG(fileInfo.st_mode)){
-		if (access(path.c_str(), fileInfo.st_mode)){
-			response.statusMessage = "no access to file";
-			response.statusCode = 404;
-			return (response);
-		}
+// 	}
+// 	return (response);
+// }
 
-	}
-	return (response);
-}
-
-HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
-	bool			allowed;
-	std::string		path;
-	HttpResponse	response;
-
-	allowed = false;
-	for (size_t i = 0; i < loc.methods.size(); i++){
-		if (loc.methods[i] == req.method)
-			allowed = true;
-	}
-	if (!allowed){
-		response.statusCode = 405;
-		response.statusMessage = "method not allowed";
-		return (response);
-	}
-	path = buildPath(req, loc);
-	if (req.method == "GET")
-		return (handleGet(req, loc, path));
-	else if (req.method == "POST")
-		return (handlePost(req, loc, path));
-	else if (req.method == "DELETE")
-		return (handleDelete(req, loc, path));
-}
 std::string resolvePath(const HttpRequest &req, ServerConfig const &server, const LocationConfig &loc)
 {
 	std::string root;
@@ -113,7 +85,7 @@ std::string resolvePath(const HttpRequest &req, ServerConfig const &server, cons
 			localUri = req.uri.substr(loc.path.length());
 	}
 	if (localUri.empty() || localUri == "/")
-        localUri = "/" + (loc.index.empty() ? server.index : loc.index);
+		localUri = "/" + (loc.index.empty() ? server.index : loc.index);
 	return root + localUri;
 }
 
@@ -125,52 +97,74 @@ std::string getMimeType(const std::string& path)
 	std::string ext = path.substr(dot + 1);
 	std::cout << "Extension : " << ext << std::endl;
 
-    if (ext == "html") return "text/html";
-    if (ext == "css")  return "text/css";
-    if (ext == "js")   return "application/javascript";
-    if (ext == "png")  return "image/png";
-    if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
-    if (ext == "gif")  return "image/gif";
-    if (ext == "ico")  return "image/x-icon";
-    if (ext == "txt")  return "text/plain";
+	if (ext == "html") return "text/html";
+	if (ext == "css")  return "text/css";
+	if (ext == "js")   return "application/javascript";
+	if (ext == "png")  return "image/png";
+	if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
+	if (ext == "gif")  return "image/gif";
+	if (ext == "ico")  return "image/x-icon";
+	if (ext == "txt")  return "text/plain";
 
 	return "application/octet-stream";
 }
 
-std::string serveFile(const std::string &fullPath)
-{
-	int fd = open(fullPath.c_str(), O_RDONLY);
-	if (fd < 0) {
-        // File not found, return 404
-        std::string body = "<h1>404 Not Found</h1>";
-        std::ostringstream out;
-        out << "HTTP/1.1 404 Not Found\r\n";
-        out << "Content-Length: " << body.size() << "\r\n";
-        out << "Content-Type: text/html\r\n";
-        out << "Connection: close\r\n\r\n";
-        out << body;
-        return out.str();
-    }
-	std::string body;
-	char buf[4096];
+HttpResponse	serveFile(std::string const &path){
+	HttpResponse	response;
+	int				fd = open(path.c_str(), O_RDONLY);
+
+	if (fd < 0)
+	{
+		response.statusCode = 404;
+		response.statusMessage = "Not Found";
+		response.body = "<html><body><h1>404 Not Found</h1></body></html>";
+		response.headers["Content-Type"] = "text/html";
+		response.headers["Content-Length"] = "47";
+		return (response);
+	}
+	char	buf[4096];
 	ssize_t bytes;
-
 	while ((bytes = read(fd, buf, sizeof(buf))) > 0)
-		body.append(buf, bytes);
+		response.body.append(buf, bytes);
 	close(fd);
-	std::ostringstream out;
-	std::string mime = getMimeType(fullPath);
-	std::cout << "Mime Type " << mime << std::endl;
-	out << "HTTP/1.1 200 OK\r\n";
-	out << "Content-Length: " << body.size() << "\r\n";
-	out << "Content-Type: " << mime << "\r\n";
-	out << "Connection: close\r\n\r\n";
-    out << body;
 
-	return out.str();
+	std::ostringstream oss;
+	oss << response.body.size();
+
+	response.statusCode    = 200;
+	response.statusMessage = "OK";
+	response.headers["Content-Type"]   = getMimeType(path);
+	response.headers["Content-Length"] = oss.str();
+	return (response);
 }
 
-// HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
-// 	(void)req;
-// 	(void)loc;
-// }
+HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
+	bool			allowed;
+	std::string		path;
+	HttpResponse	response;
+	ServerConfig	server;
+
+	allowed = false;
+	for (size_t i = 0; i < loc.methods.size(); i++){
+		if (loc.methods[i] == req.method)
+			allowed = true;
+	}
+	if (!allowed){
+		response.statusCode = 405;
+		response.statusMessage = "method not allowed";
+		return (response);
+	}
+	path = resolvePath(req, server, loc);
+	if (req.method == "GET")
+		return(response);
+		// return (handleGet(req, loc, path));
+	else if (req.method == "POST")
+		return(response);
+
+		// return (handlePost(req, loc, path));
+	else if (req.method == "DELETE")
+		return(response);
+
+	return (response);
+	// return (handleDelete(req, loc, path));
+}
