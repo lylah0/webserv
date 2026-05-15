@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/14 14:59:17 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/15 20:39:57 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,28 +48,55 @@ LocationConfig	route(HttpRequest const &req, ServerConfig const &config){
 	return(loc);
 }
 
-// HttpResponse	handleGet(HttpRequest const &request, LocationConfig const &location, std::string path){
-// 	HttpResponse	response;
-// 	struct stat		fileInfo;
+HttpResponse	handleGet(LocationConfig const &location, std::string path){
+	HttpResponse	response;
+	struct stat		fileInfo;
+	std::string		name;
+	DIR				*dir;
+	dirent			*entry;
 
-// 	if (stat(path.c_str(), &fileInfo)){
-// 		response.statusCode = 404;
-// 		response.statusMessage = "path not found";
-// 		return(response);
-// 	}
-// 	if (S_ISDIR(fileInfo.st_mode))
-// 		return;
-// 		//listing
-// 	else if (S_ISREG(fileInfo.st_mode)){
-// 		if (access(path.c_str(), fileInfo.st_mode)){
-// 			response.statusMessage = "no access to file";
-// 			response.statusCode = 404;
-// 			return (response);
-// 		}
-
-// 	}
-// 	return (response);
-// }
+	if (stat(path.c_str(), &fileInfo) < 0){
+		response.statusCode = 404;
+		response.statusMessage = "Not found";
+		return(response);
+	}
+	if (S_ISDIR(fileInfo.st_mode)){
+		std::cout << "autoindex: " << location.autoindex << std::endl;
+		if (location.autoindex){
+			dir = opendir(path.c_str());
+			std::cout << "opendir result: " << (dir == NULL ? "NULL" : "OK") << std::endl;
+			if (dir == NULL){
+				response.statusCode = 500;
+				response.statusMessage = "Internal server error";
+				return(response);
+			}
+			response.body = "<html><body><h1>Index of :" + path + "</h1><ul>";
+			while ((entry = readdir(dir)) != NULL){
+				name = entry->d_name;
+				response.body += "<li><a href=\"" + name + "\">" + name + "</a></li>";
+			}
+			response.body += "</ul></body></html>";
+			closedir(dir);
+			response.statusCode = 200;
+			response.statusMessage = "OK";
+			return(response);
+		}
+		else{
+			response.statusCode = 403;
+			response.statusMessage = "Forbidden";
+			return (response);
+		}
+	}
+	else if (S_ISREG(fileInfo.st_mode)){
+		if (access(path.c_str(), R_OK) < 0){
+			response.statusMessage = "Forbidden";
+			response.statusCode = 403;
+			return (response);
+		}
+		return (serveFile(path));
+	}
+	return (response);
+}
 
 std::string resolvePath(const HttpRequest &req, ServerConfig const &server, const LocationConfig &loc)
 {
@@ -113,6 +140,7 @@ HttpResponse	serveFile(std::string const &path){
 	HttpResponse	response;
 	int				fd = open(path.c_str(), O_RDONLY);
 
+	std::cout << "serveFile: " << path << std::endl;
 	if (fd < 0)
 	{
 		response.statusCode = 404;
@@ -138,11 +166,10 @@ HttpResponse	serveFile(std::string const &path){
 	return (response);
 }
 
-HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
+HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerConfig const &server){
 	bool			allowed;
 	std::string		path;
 	HttpResponse	response;
-	ServerConfig	server;
 
 	allowed = false;
 	for (size_t i = 0; i < loc.methods.size(); i++){
@@ -156,8 +183,7 @@ HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc){
 	}
 	path = resolvePath(req, server, loc);
 	if (req.method == "GET")
-		return(response);
-		// return (handleGet(req, loc, path));
+		return (handleGet(loc, path));
 	else if (req.method == "POST")
 		return(response);
 

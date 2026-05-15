@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/14 15:21:06 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/15 16:48:40 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void	PollServer::_clientEvent(size_t index){
 	std::string		buffer;
 	HttpRequest		request;
 	HttpResponse	response;
-	std::string		fullpath;
+	// std::string		fullpath;
 	LocationConfig	loc;
 
 	clientFd = _fds[index].fd;
@@ -73,13 +73,12 @@ void	PollServer::_clientEvent(size_t index){
 		_removeFd(clientFd);
 		return;
 	}
+	std::cout << "Buffer: [" << _clients[clientFd]->getReadBuffer() << "]" << std::endl;
 	buffer = _clients[clientFd]->getReadBuffer();
 	request	 = parseRequest(buffer);
 	loc = route(request, _clientConfig[clientFd]);
-	fullpath = resolvePath(request, _clientConfig[clientFd], loc);
-	response = serveFile(fullpath);
-	// HARDCODE : WILL REMOVE
-	// std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello World!\n";
+	// fullpath = resolvePath(request, _clientConfig[clientFd], loc);
+	response = execute(request, loc, _clientConfig[clientFd]);
 	_clients[clientFd]->prepResponse(response);
 	_enableWrite(clientFd);
 }

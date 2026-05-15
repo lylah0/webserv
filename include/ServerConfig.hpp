@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 17:23:56 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/04 10:56:01 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/14 21:08:52 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # include <string>
 # include <vector>
-# include "LocationConfig.hpp"
+# include "LocationConfig.hpp"	
 
 struct ServerConfig {
 	std::string					server_name;
