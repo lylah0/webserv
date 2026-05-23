@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/15 20:39:57 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/22 16:31:53 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,56 +46,6 @@ LocationConfig	route(HttpRequest const &req, ServerConfig const &config){
 			}
 		}
 	return(loc);
-}
-
-HttpResponse	handleGet(LocationConfig const &location, std::string path){
-	HttpResponse	response;
-	struct stat		fileInfo;
-	std::string		name;
-	DIR				*dir;
-	dirent			*entry;
-
-	if (stat(path.c_str(), &fileInfo) < 0){
-		response.statusCode = 404;
-		response.statusMessage = "Not found";
-		return(response);
-	}
-	if (S_ISDIR(fileInfo.st_mode)){
-		std::cout << "autoindex: " << location.autoindex << std::endl;
-		if (location.autoindex){
-			dir = opendir(path.c_str());
-			std::cout << "opendir result: " << (dir == NULL ? "NULL" : "OK") << std::endl;
-			if (dir == NULL){
-				response.statusCode = 500;
-				response.statusMessage = "Internal server error";
-				return(response);
-			}
-			response.body = "<html><body><h1>Index of :" + path + "</h1><ul>";
-			while ((entry = readdir(dir)) != NULL){
-				name = entry->d_name;
-				response.body += "<li><a href=\"" + name + "\">" + name + "</a></li>";
-			}
-			response.body += "</ul></body></html>";
-			closedir(dir);
-			response.statusCode = 200;
-			response.statusMessage = "OK";
-			return(response);
-		}
-		else{
-			response.statusCode = 403;
-			response.statusMessage = "Forbidden";
-			return (response);
-		}
-	}
-	else if (S_ISREG(fileInfo.st_mode)){
-		if (access(path.c_str(), R_OK) < 0){
-			response.statusMessage = "Forbidden";
-			response.statusCode = 403;
-			return (response);
-		}
-		return (serveFile(path));
-	}
-	return (response);
 }
 
 std::string resolvePath(const HttpRequest &req, ServerConfig const &server, const LocationConfig &loc)
@@ -186,11 +136,9 @@ HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerCo
 		return (handleGet(loc, path));
 	else if (req.method == "POST")
 		return(response);
-
 		// return (handlePost(req, loc, path));
 	else if (req.method == "DELETE")
 		return(response);
-
 	return (response);
 	// return (handleDelete(req, loc, path));
 }
