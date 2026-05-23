@@ -1,31 +1,74 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ClientConnection.cpp                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/13 19:15:42 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/05/14 15:30:36 by lylrandr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ClientConnection.hpp"
 
-ClientConnection::ClientConnection(int fd) : _fd(fd) {}
+ClientConnection::ClientConnection(int fd) : _fd(fd), _writeOffset(0){}
 
-ClientConnection::~ClientConnection()
-{
-    close(_fd);
+ClientConnection::~ClientConnection(){
+	close(_fd);
 }
 
-void ClientConnection::handle()
+std::string	ClientConnection::getBuffer() const{
+	return (_writeBuffer);
+}
+
+size_t	ClientConnection::getOffset() const{
+	return (_writeOffset);
+}
+
+int	ClientConnection::getFd() const{
+	return (_fd);
+}
+
+std::string const&	ClientConnection::getReadBuffer() const{
+	return (_readBuffer);
+}
+
+bool	ClientConnection::handleRead(){
+	char	buf[4096];
+	ssize_t	bytes;
+	bytes = recv(_fd, buf, sizeof(buf), 0);
+	if (bytes <= 0)
+		return (false);
+	_readBuffer.append(buf, bytes);
+	return (true);
+}
+
+bool	ClientConnection::handleWrite(){
+	size_t		rest;
+	ssize_t		bytes;
+	const char	*data;
+
+	data = _writeBuffer.c_str() + _writeOffset;
+	rest = _writeBuffer.size() - _writeOffset;
+	bytes = send(_fd, data, rest, 0);
+	if (bytes < 0)
+		return (false);
+	_writeOffset += bytes;
+	return (true);
+}
+
+void ClientConnection::prepResponse(const HttpResponse &response)
 {
-    char buffer[4096];
-    std::memset(buffer, 0, sizeof(buffer));
-    int bytes = recv(_fd, buffer, sizeof(buffer) - 1, 0);
-    if (bytes < 0)
-        throw std::runtime_error("recv() failed");
-    std::cout << "----- Received Request -----\n"
-                << buffer
-                << "----------------------------\n";
+	std::ostringstream out;
 
-    const char* resp = 
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/plain\r\n"
-        "Content-Length: 14\r\n"
-        "Connection: close\r\n"
-        "\r\n"
-        "Hello, webserv\n";
+	out << "HTTP/1.1 " << response.statusCode << " " << response.statusMessage << "\r\n";
+	for (std::map<std::string, std::string>::const_iterator it = response.headers.begin();
+			it != response.headers.end(); it++)
+		out << it->first << ": " << it->second << "\r\n";
+	out << "\r\n";
+	out << response.body;
 
-    if (send(_fd, resp, std::strlen(resp), 0) < 0)
-        throw std::runtime_error("send() failed");
+	_writeBuffer = out.str();
+	_writeOffset = 0;
 }

@@ -1,0 +1,23 @@
+body {
+    background: #0a0a0a;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+h1 {
+    color: #fafafa;
+}
+
+h2 {
+    color: #fafafa;
+}
+
+p {
+    color: #fafafa;
+}
+
+img {
+    border: 2px solid #fafafa;
+    padding: 5px;
+    background: black;
+}
