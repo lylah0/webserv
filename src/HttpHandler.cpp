@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/22 16:31:53 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/23 19:59:17 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,8 +135,7 @@ HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerCo
 	if (req.method == "GET")
 		return (handleGet(loc, path));
 	else if (req.method == "POST")
-		return(response);
-		// return (handlePost(req, loc, path));
+		return (handlePost(req, loc));
 	else if (req.method == "DELETE")
 		return(response);
 	return (response);
