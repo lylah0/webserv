@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 18:27:14 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/14 15:12:28 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/26 18:12:43 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,13 @@ class	ClientConnection{
 		~ClientConnection();
 
 		std::string				getBuffer() const;
+		std::string const&		getReadBuffer() const;
 		size_t					getOffset() const;
 		int						getFd() const;
-		std::string const&		getReadBuffer() const;
 		bool					handleRead();
 		bool					handleWrite();
 		void					prepResponse(const HttpResponse &body);
+		void					clearReadBuffer();
 };
 
 #endif

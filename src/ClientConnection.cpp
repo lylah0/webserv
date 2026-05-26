@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 19:15:42 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/14 15:30:36 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/26 18:11:47 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,4 +71,8 @@ void ClientConnection::prepResponse(const HttpResponse &response)
 
 	_writeBuffer = out.str();
 	_writeOffset = 0;
+}
+
+void	ClientConnection::clearReadBuffer(){
+	_readBuffer.clear();
 }

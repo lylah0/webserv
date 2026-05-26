@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/15 16:48:40 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/26 18:12:48 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,10 +59,11 @@ void	PollServer::_newConnection(int serverFd){
 
 void	PollServer::_clientEvent(size_t index){
 	int				clientFd;
+	size_t			pos;
+	std::string		len;
 	std::string		buffer;
 	HttpRequest		request;
 	HttpResponse	response;
-	// std::string		fullpath;
 	LocationConfig	loc;
 
 	clientFd = _fds[index].fd;
@@ -75,12 +76,36 @@ void	PollServer::_clientEvent(size_t index){
 	}
 	std::cout << "Buffer: [" << _clients[clientFd]->getReadBuffer() << "]" << std::endl;
 	buffer = _clients[clientFd]->getReadBuffer();
+	ClientState		&state = _states[clientFd];
+	if (!state.headersComplete){
+		if (buffer.find("\r\n\r\n") != std::string::npos)
+			state.headersComplete = true;
+		else
+			return;
+	}
+	if (!state.requestReady){
+		pos = buffer.find("Content-Length: ");
+		if (pos == std::string::npos){
+			state.contentLength = 0;
+			state.requestReady = true;
+		}
+		else {
+			len = buffer.substr(pos + 16, buffer.find("\r\n", pos + 16) - (pos + 16));
+			state.contentLength = std::atoi(len.c_str());
+			pos = buffer.find("\r\n\r\n");
+			if (buffer.substr(pos + 4).size() >= state.contentLength)
+				state.requestReady = true;
+			else
+				return;
+		}
+	}
 	request	 = parseRequest(buffer);
 	loc = route(request, _clientConfig[clientFd]);
-	// fullpath = resolvePath(request, _clientConfig[clientFd], loc);
 	response = execute(request, loc, _clientConfig[clientFd]);
 	_clients[clientFd]->prepResponse(response);
 	_enableWrite(clientFd);
+	_states[clientFd] = ClientState();
+	_clients[clientFd]->clearReadBuffer();
 }
 
 void	PollServer::_enableWrite(int fd){

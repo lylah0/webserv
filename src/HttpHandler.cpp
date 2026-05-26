@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/23 19:59:17 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/26 15:25:40 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,10 +87,10 @@ std::string getMimeType(const std::string& path)
 }
 
 HttpResponse	serveFile(std::string const &path){
-	HttpResponse	response;
-	int				fd = open(path.c_str(), O_RDONLY);
+	std::ostringstream	oss;
+	HttpResponse		response;
+	int					fd = open(path.c_str(), O_RDONLY);
 
-	std::cout << "serveFile: " << path << std::endl;
 	if (fd < 0)
 	{
 		response.statusCode = 404;
@@ -106,7 +106,6 @@ HttpResponse	serveFile(std::string const &path){
 		response.body.append(buf, bytes);
 	close(fd);
 
-	std::ostringstream oss;
 	oss << response.body.size();
 
 	response.statusCode    = 200;
