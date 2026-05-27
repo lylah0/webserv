@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/23 19:59:16 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/27 13:38:21 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,6 @@ HttpResponse	isDir(LocationConfig const &location, std::string path, HttpRespons
 HttpResponse	handleGet(LocationConfig const &location, std::string path){
 	HttpResponse		response;
 	struct stat			fileInfo;
-
-
 
 	if (stat(path.c_str(), &fileInfo) < 0){
 		response.statusCode = 404;
