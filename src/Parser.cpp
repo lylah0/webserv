@@ -102,6 +102,8 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
 
 void ConfigParser::parseTokens(const std::vector<std::string> &tokens) {
 	size_t i = 0;
+	int errorCode;
+	std::string errorPath;
 
     while (i < tokens.size()) {
         if (tokens[i] != "server")
@@ -126,8 +128,10 @@ void ConfigParser::parseTokens(const std::vector<std::string> &tokens) {
             if (i >= tokens.size())
                 throw std::runtime_error("Unexpected end of file");
             std::string value = tokens[i++];
-            if (i >= tokens.size() || tokens[i] != ";")
+            if (i >= tokens.size() || tokens[i] != ";"){
+				std::cout << tokens[i] << std::endl;
                 throw std::runtime_error("Expected ';'");
+			}
             ++i;
             if (key == "server_name") cfg.server_name = value;
             else if (key == "listen") cfg.listen = std::atoi(value.c_str());
@@ -135,10 +139,17 @@ void ConfigParser::parseTokens(const std::vector<std::string> &tokens) {
             else if (key == "root") cfg.root = value;
             else if (key == "index") cfg.index = value;
             else if (key == "client_max_body_size") cfg.client_max_body_size = std::strtoul(value.c_str(), 0, 10);
-            else if (key == "error_page") cfg.error_page = value;
+            else if (key == "error_page"){
+    			errorCode = std::atoi(value.c_str());
+    			errorPath = tokens[i++];
+    			if (tokens[i] != ";"){
+    				throw std::runtime_error("Expected ';'");
+				}
+				cfg.error_page[errorCode] = errorPath;
+			}
             else
                 throw std::runtime_error("Unknown directive: " + key);
-        }
+    	}
         if (i >= tokens.size() || tokens[i] != "}")
             throw std::runtime_error("Expected '}' at end of server block");
         ++i;

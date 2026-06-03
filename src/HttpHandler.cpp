@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/27 13:06:43 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/27 16:35:25 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,9 +105,7 @@ HttpResponse	serveFile(std::string const &path){
 	while ((bytes = read(fd, buf, sizeof(buf))) > 0)
 		response.body.append(buf, bytes);
 	close(fd);
-
 	oss << response.body.size();
-
 	response.statusCode    = 200;
 	response.statusMessage = "OK";
 	response.headers["Content-Type"]   = getMimeType(path);

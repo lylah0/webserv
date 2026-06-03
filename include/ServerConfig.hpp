@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 17:23:56 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/14 21:08:52 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/27 17:21:14 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,16 @@
 
 # include <string>
 # include <vector>
-# include "LocationConfig.hpp"	
+# include "LocationConfig.hpp"
 
 struct ServerConfig {
-	std::string					server_name;
 	int							listen;
+	size_t						client_max_body_size;
+	std::string					server_name;
 	std::string					host;
 	std::string					root;
 	std::string					index;
-	size_t						client_max_body_size;
-	std::string					error_page;
+	std::map<int, std::string>	error_page;
 	std::vector<LocationConfig>	locations;
 };
 

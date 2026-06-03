@@ -6,11 +6,25 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/27 13:38:21 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/05/27 17:21:09 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpHandler.hpp"
+
+HttpResponse	buildError(int code, std::string const &message, ServerConfig const &config){
+	HttpResponse		response;
+	std::ostringstream	oss;
+
+	if (config.error_page.empty()){
+		oss << code;
+		response.body = "<html><body><h1>Error :" + oss.str() + message + "</h1><ul>";
+	}
+	else{
+		response = serveFile(config.root);
+	}
+	return (response);
+}
 
 HttpResponse	isDir(LocationConfig const &location, std::string path, HttpResponse response){
 	std::ostringstream	oss;
@@ -51,11 +65,10 @@ HttpResponse	isDir(LocationConfig const &location, std::string path, HttpRespons
 HttpResponse	handleGet(LocationConfig const &location, std::string path){
 	HttpResponse		response;
 	struct stat			fileInfo;
+	ServerConfig		config;
 
 	if (stat(path.c_str(), &fileInfo) < 0){
-		response.statusCode = 404;
-		response.statusMessage = "Not found";
-		return(response);
+		return (buildError(404, "Not found", config));
 	}
 	if (S_ISDIR(fileInfo.st_mode))
 		return (isDir(location, path, response));
