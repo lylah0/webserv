@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/04 17:20:01 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/04 17:29:05 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,12 @@ void	PollServer::_clientEvent(size_t index){
 		return;
 	}
 	std::cout << "Buffer: [" << _clients[clientFd]->getReadBuffer() << "]" << std::endl;
-	if (buffer.size() > _clientConfig[clientFd].client_max_body_size)
-		return(buildError(413, "Content too large", _clientConfig[clientFd]))
+	if (buffer.size() > _clientConfig[clientFd].client_max_body_size) {
+		response = buildError(413, "Content too large", _clientConfig[clientFd]);
+		_clients[clientFd]->prepResponse(response);
+		_enableWrite(clientFd);
+		return;
+	}
 	buffer = _clients[clientFd]->getReadBuffer();
 	ClientState		&state = _states[clientFd];
 	if (!state.headersComplete){
