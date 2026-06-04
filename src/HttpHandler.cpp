@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/05/27 16:35:25 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/04 17:05:38 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,20 +86,13 @@ std::string getMimeType(const std::string& path)
 	return "application/octet-stream";
 }
 
-HttpResponse	serveFile(std::string const &path){
+HttpResponse	serveFile(std::string const &path, ServerConfig const &config){
 	std::ostringstream	oss;
 	HttpResponse		response;
 	int					fd = open(path.c_str(), O_RDONLY);
 
 	if (fd < 0)
-	{
-		response.statusCode = 404;
-		response.statusMessage = "Not Found";
-		response.body = "<html><body><h1>404 Not Found</h1></body></html>";
-		response.headers["Content-Type"] = "text/html";
-		response.headers["Content-Length"] = "47";
-		return (response);
-	}
+		return (buildError(404, "Not found", config));
 	char	buf[4096];
 	ssize_t bytes;
 	while ((bytes = read(fd, buf, sizeof(buf))) > 0)
@@ -113,7 +106,7 @@ HttpResponse	serveFile(std::string const &path){
 	return (response);
 }
 
-HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerConfig const &server){
+HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerConfig const &config){
 	bool			allowed;
 	std::string		path;
 	HttpResponse	response;
@@ -123,16 +116,13 @@ HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerCo
 		if (loc.methods[i] == req.method)
 			allowed = true;
 	}
-	if (!allowed){
-		response.statusCode = 405;
-		response.statusMessage = "method not allowed";
-		return (response);
-	}
-	path = resolvePath(req, server, loc);
+	if (!allowed)
+		return (buildError(405, "Not allowed"));
+	path = resolvePath(req, config, loc);
 	if (req.method == "GET")
 		return (handleGet(loc, path));
 	else if (req.method == "POST")
-		return (handlePost(req, loc));
+		return (handlePost(req, loc, config));
 	else if (req.method == "DELETE")
 		return(response);
 	return (response);
