@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/08 17:30:21 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/09 00:51:13 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,15 +97,8 @@ HttpResponse	serveFile(std::string const &path, ServerConfig const &config){
 	HttpResponse		response;
 	int					fd = open(path.c_str(), O_RDONLY);
 
-	(void)config;
-	if (fd < 0){
-		response.statusCode    = 404;
-		response.statusMessage = "Not Found";
-		response.body          = "<html><body><h1>404 Not Found</h1></body></html>";
-		response.headers["Content-Type"]   = "text/html";
-		response.headers["Content-Length"] = "47";
-		return (response);
-	}
+	if (fd < 0)
+		return (buildError(404, "Not found", config));
 	char	buf[4096];
 	ssize_t bytes;
 	while ((bytes = read(fd, buf, sizeof(buf))) > 0)
@@ -133,7 +126,7 @@ HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerCo
 		return (buildError(405, "Not allowed", config));
 	path = resolvePath(req, config, loc);
 	if (req.method == "GET")
-		return (handleGet(loc, path));
+		return (handleGet(loc, path, config));
 	else if (req.method == "POST")
 		return (handlePost(req, loc, config));
 	else if (req.method == "DELETE")

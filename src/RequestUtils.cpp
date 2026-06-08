@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/08 18:17:49 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/09 00:49:48 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,31 @@
 HttpResponse buildError(int code, std::string const &message, ServerConfig const &config){
 	HttpResponse		response;
 	std::ostringstream	oss;
+	std::string			fullpath;
 
-	std::cout << "buildError code: " << code << " error_page count: " << config.error_page.count(code) << std::endl;
-	if (config.error_page.count(code))
-		return (serveFile(config.error_page.at(code), config));
-	oss << code;
-	response.statusCode = code;
+	response.statusCode    = code;
 	response.statusMessage = message;
+	response.headers["Content-Type"] = "text/html";
+	std::cout << "map size: " << config.error_page.size() << std::endl;
+	for (std::map<int, std::string>::const_iterator it = config.error_page.begin(); it != config.error_page.end(); it++)
+		std::cout << "code: " << it->first << " path: " << it->second << std::endl;
+	if (config.error_page.count(code)){
+		fullpath = config.root + config.error_page.at(code);
+		std::cout << "fullpath: [" << fullpath << "]" << std::endl;
+		int fd = open(fullpath.c_str(), O_RDONLY);
+		if (fd >= 0){
+			char	buf[4096];
+			ssize_t	bytes;
+			while ((bytes = read(fd, buf, sizeof(buf))) > 0)
+				response.body.append(buf, bytes);
+			close(fd);
+			oss << response.body.size();
+			response.headers["Content-Length"] = oss.str();
+			return (response);
+		}
+	}
+	oss << code;
 	response.body = "<html><body><h1>" + oss.str() + " " + message + "</h1></body></html>";
-	response.headers["Content-Type"]   = "text/html";
 	oss.str("");
 	oss << response.body.size();
 	response.headers["Content-Length"] = oss.str();
@@ -60,10 +76,9 @@ HttpResponse	isDir(LocationConfig const &location, std::string path, HttpRespons
 		return (buildError(403, "Forbidden", config));
 }
 
-HttpResponse	handleGet(LocationConfig const &location, std::string path){
+HttpResponse	handleGet(LocationConfig const &location, std::string path, ServerConfig const &config){
 	HttpResponse		response;
 	struct stat			fileInfo;
-	ServerConfig		config;
 
 	std::cout << "handleGet path: [" << path << "]" << std::endl;
 	if (stat(path.c_str(), &fileInfo) < 0){

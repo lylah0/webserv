@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/08 18:14:25 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/09 00:46:08 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ void	PollServer::_newConnection(int serverFd){
 			clientStatus =  _servers[i]->acceptClient();
 			if (clientStatus < 0)
 				return;
+				std::cout << "newConnection config error_page size: " << _configs[i].error_page.size() << std::endl;
 			_addFd(clientStatus);
 			_clients[clientStatus] = new ClientConnection(clientStatus);
 			_states[clientStatus] = ClientState();
@@ -140,7 +141,7 @@ void	PollServer::_disableWrite(int fd){
 
 void	PollServer::addServer(ServerConfig const &server){
 	int	fd;
-
+	std::cout << "addServer error_page size: " << server.error_page.size() << std::endl;
 	_configs.push_back(server);
 	_servers.push_back(new ServerSocket(server));
 	fd = _servers.back()->getFd();
