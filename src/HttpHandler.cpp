@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/04 17:05:38 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/08 17:30:21 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,17 @@ HttpRequest	parseRequest(std::string const &buffer){
 
 	stream >> req.method >> req.uri >> req.version;
 	std::getline(stream, line);
+	if (!stream.good())
+		return (req);
 	while (std::getline(stream,line)){
+		std::cout << "in getline loop" << std::endl;
 		if (line == "\r" || line.empty())
 			break;
-		key = line.substr(0, line.find(':'));
-		value = line.substr(line.find(':') + 2);
+		size_t colon = line.find(':');
+		if (colon == std::string::npos)
+			continue;
+		key = line.substr(0, colon);
+		value = line.substr(colon + 2);
 		if (!value.empty() && value[value.size() - 1] == '\r')
 			value.erase(value.size() - 1);
 		req.headers[key] = value;
@@ -91,8 +97,15 @@ HttpResponse	serveFile(std::string const &path, ServerConfig const &config){
 	HttpResponse		response;
 	int					fd = open(path.c_str(), O_RDONLY);
 
-	if (fd < 0)
-		return (buildError(404, "Not found", config));
+	(void)config;
+	if (fd < 0){
+		response.statusCode    = 404;
+		response.statusMessage = "Not Found";
+		response.body          = "<html><body><h1>404 Not Found</h1></body></html>";
+		response.headers["Content-Type"]   = "text/html";
+		response.headers["Content-Length"] = "47";
+		return (response);
+	}
 	char	buf[4096];
 	ssize_t bytes;
 	while ((bytes = read(fd, buf, sizeof(buf))) > 0)
@@ -117,7 +130,7 @@ HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerCo
 			allowed = true;
 	}
 	if (!allowed)
-		return (buildError(405, "Not allowed"));
+		return (buildError(405, "Not allowed", config));
 	path = resolvePath(req, config, loc);
 	if (req.method == "GET")
 		return (handleGet(loc, path));

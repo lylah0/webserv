@@ -6,19 +6,19 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/04 17:05:09 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/08 18:17:49 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpHandler.hpp"
 
-HttpResponse buildError(int code, std::string const &message, ServerConfig const &config)
-{
+HttpResponse buildError(int code, std::string const &message, ServerConfig const &config){
 	HttpResponse		response;
 	std::ostringstream	oss;
 
+	std::cout << "buildError code: " << code << " error_page count: " << config.error_page.count(code) << std::endl;
 	if (config.error_page.count(code))
-		return serveFile(config.error_page.at(code), config);
+		return (serveFile(config.error_page.at(code), config));
 	oss << code;
 	response.statusCode = code;
 	response.statusMessage = message;

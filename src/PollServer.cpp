@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/04 17:29:05 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/08 18:14:25 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ void	PollServer::_clientEvent(size_t index){
 	LocationConfig	loc;
 
 	clientFd = _fds[index].fd;
+	if (_clientConfig.find(clientFd) == _clientConfig.end())
+		return;
 	if (_clients[clientFd]->handleRead() == false){
 		delete _clients[clientFd];
 		_clients.erase(clientFd);
@@ -74,14 +76,14 @@ void	PollServer::_clientEvent(size_t index){
 		_removeFd(clientFd);
 		return;
 	}
-	std::cout << "Buffer: [" << _clients[clientFd]->getReadBuffer() << "]" << std::endl;
+	buffer = _clients[clientFd]->getReadBuffer();
 	if (buffer.size() > _clientConfig[clientFd].client_max_body_size) {
+		std::cout << buffer.size() << " " << _clientConfig[clientFd].client_max_body_size << std::endl;
 		response = buildError(413, "Content too large", _clientConfig[clientFd]);
 		_clients[clientFd]->prepResponse(response);
 		_enableWrite(clientFd);
 		return;
 	}
-	buffer = _clients[clientFd]->getReadBuffer();
 	ClientState		&state = _states[clientFd];
 	if (!state.headersComplete){
 		if (buffer.find("\r\n\r\n") != std::string::npos)
@@ -100,12 +102,18 @@ void	PollServer::_clientEvent(size_t index){
 			state.contentLength = std::atoi(len.c_str());
 			pos = buffer.find("\r\n\r\n");
 			if (buffer.substr(pos + 4).size() >= state.contentLength)
-				state.requestReady = true;
+			state.requestReady = true;
 			else
-				return;
+			return;
 		}
 	}
 	request	 = parseRequest(buffer);
+	if (request.method.empty() || request.uri.empty() || request.version.empty()){
+		response = buildError(400, "Bad request", _clientConfig[clientFd]);
+		_clients[clientFd]->prepResponse(response);
+		_enableWrite(clientFd);
+		return;
+	}
 	loc = route(request, _clientConfig[clientFd]);
 	response = execute(request, loc, _clientConfig[clientFd]);
 	_clients[clientFd]->prepResponse(response);

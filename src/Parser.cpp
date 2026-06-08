@@ -85,7 +85,6 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
             continue;
         }
         std::string value = tokens[i++];
-        //std::cout << key << '\n' << value << std::endl;
         if (tokens[i] != ";")
             throw std::runtime_error("Expected ';'");
         ++i;
@@ -127,7 +126,7 @@ void ConfigParser::parseTokens(const std::vector<std::string> &tokens) {
             std::string key = tokens[i++];
 			std::string value = tokens[i++];
             if (i >= tokens.size())
-			throw std::runtime_error("Unexpected end of file");
+				throw std::runtime_error("Unexpected end of file");
 			if (key == "error_page"){
 				errorCode = std::atoi(value.c_str());
 				errorPath = tokens[i++];
