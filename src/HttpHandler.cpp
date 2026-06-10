@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpHandler.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/06/10 12:08:11 by lylrandr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "HttpHandler.hpp"
 #include <sstream>
 #include <sys/stat.h>
@@ -137,6 +149,10 @@ std::string getMimeType(const std::string &path)
     return "application/octet-stream";
 }
 
+HttpResponse	serveFile(std::string const &path, ServerConfig const &config){
+	std::ostringstream	oss;
+	HttpResponse		response;
+	int					fd = open(path.c_str(), O_RDONLY);
 HttpResponse serveFile(const std::string &path)
 {
     HttpResponse response;

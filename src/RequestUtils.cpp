@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/08 18:54:45 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/06/10 12:09:32 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

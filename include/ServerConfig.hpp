@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 17:23:56 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/08 18:47:57 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/06/10 11:45:18 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,12 @@
 # include "LocationConfig.hpp"
 
 struct ServerConfig {
-	std::string					server_name;
 	int							listen;
+	size_t						client_max_body_size;
+	std::string					server_name;
 	std::string					host;
 	std::string					root;
 	std::string					index;
-	size_t						client_max_body_size;
 	std::map<int, std::string>	error_page;
 	std::vector<LocationConfig>	locations;
 };

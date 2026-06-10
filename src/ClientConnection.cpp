@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ClientConnection.cpp                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/13 19:15:42 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/06/10 12:06:24 by lylrandr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ClientConnection.hpp"
 #include <iostream>
 #include <sstream>
@@ -156,4 +168,8 @@ size_t ClientConnection::getOffset() const {
 
 int ClientConnection::getFd() const {
     return _fd;
+}
+
+void	ClientConnection::clearReadBuffer(){
+	_readBuffer.clear();
 }

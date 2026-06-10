@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 15:57:48 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/01 16:21:37 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/06/10 11:44:55 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
