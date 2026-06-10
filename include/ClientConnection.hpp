@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 18:27:14 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 11:42:47 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/10 11:42:56 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ public :
     std::string getBuffer() const;
     size_t getOffset() const;
     int getFd() const;
+	void					clearReadBuffer();
 };
 
 #endif
