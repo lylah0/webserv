@@ -13,8 +13,11 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "PollServer.hpp"
 #include "CGIProcess.hpp"
+struct HttpRequest;
+struct HttpResponse;
+struct ServerConfig;
+struct LocationConfig;
 
 struct CGIEnv {
     std::string requestMethod;

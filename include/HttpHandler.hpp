@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:17:37 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 11:44:27 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/10 12:34:13 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,11 @@
 # include <sys/stat.h>
 # include <unistd.h>
 # include <fcntl.h>
-# include <fcntl.h>
 # include "HttpRequest.hpp"
 # include "LocationConfig.hpp"
 # include "HttpResponse.hpp"
 # include "ServerConfig.hpp"
-# include "CGI.hpp"
+#include "Parser.hpp"
 
 struct MultipartPart {
 	std::string	filename;
@@ -35,7 +34,6 @@ struct MultipartPart {
 HttpRequest		parseRequest(std::string const &buffer, size_t bodyOffset, size_t bodyLength);
 HttpResponse	serveFile(const std::string &fullPath);
 HttpResponse	buildError(int code, std::string const &message, ServerConfig const &config);
-HttpResponse	serveFile(const std::string &fullPath);
 HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerConfig const &server);
 LocationConfig	route(HttpRequest const &req, ServerConfig const &config);
 HttpResponse	handleGet(LocationConfig const &location, std::string path);

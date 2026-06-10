@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 12:09:01 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/10 12:31:49 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -458,4 +458,21 @@ void PollServer::runServer() {
             }
         }
     }
+}
+
+bool tryLaunchCGI(const HttpRequest &req,
+	const LocationConfig &loc,
+	const ServerConfig &server,
+	const std::string &path,
+	int clientFd,
+	PollServer &poll)
+{
+if ((req.method == "GET" || req.method == "POST") &&
+isCGIvalid(loc, path))
+{
+CGIProcess cgi = launchCGI(req, server, loc, path);
+poll.registerCGI(clientFd, cgi);
+return true;
+}
+return false;
 }

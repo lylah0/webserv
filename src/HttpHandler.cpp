@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 12:08:11 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/10 12:31:56 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "CGI.hpp"
 
 HttpRequest parseRequest(const std::string &buffer,
                          size_t bodyOffset,
@@ -58,21 +59,13 @@ LocationConfig route(const HttpRequest &req, const ServerConfig &config)
 
     for (size_t i = 0; i < config.locations.size(); i++) {
         const LocationConfig &loc = config.locations[i];
-
         if (req.uri.compare(0, loc.path.size(), loc.path) == 0) {
             if (!best || loc.path.size() > best->path.size())
                 best = &loc;
         }
     }
-
-    if (!best) {
-        //std::cout << "Routing URI: " << req.uri
-                  //<< " → matched location: / (default)\n";
+    if (!best)
         return config.locations[0];
-    }
-
-    //std::cout << "Routing URI: " << req.uri
-              //<< " → matched location: " << best->path << "\n";
     return *best;
 }
 
@@ -149,10 +142,6 @@ std::string getMimeType(const std::string &path)
     return "application/octet-stream";
 }
 
-HttpResponse	serveFile(std::string const &path, ServerConfig const &config){
-	std::ostringstream	oss;
-	HttpResponse		response;
-	int					fd = open(path.c_str(), O_RDONLY);
 HttpResponse serveFile(const std::string &path)
 {
     HttpResponse response;
@@ -185,23 +174,6 @@ HttpResponse serveFile(const std::string &path)
     response.headers["Content-Length"] = oss.str();
 
     return response;
-}
-
-bool tryLaunchCGI(const HttpRequest &req,
-                  const LocationConfig &loc,
-                  const ServerConfig &server,
-                  const std::string &path,
-                  int clientFd,
-                  PollServer &poll)
-{
-    if ((req.method == "GET" || req.method == "POST") &&
-        isCGIvalid(loc, path))
-    {
-        CGIProcess cgi = launchCGI(req, server, loc, path);
-        poll.registerCGI(clientFd, cgi);
-        return true;
-    }
-    return false;
 }
 
 HttpResponse execute(const HttpRequest &req,
