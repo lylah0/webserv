@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 12:09:32 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/10 12:59:22 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ static std::string toString(size_t n) {
 
 HttpResponse isDir(LocationConfig const &location,
                    std::string path,
-                   HttpResponse response)
+                   HttpResponse response, ServerConfig const &config)
 {
     std::ostringstream oss;
     std::string        name;
@@ -92,13 +92,7 @@ HttpResponse isDir(LocationConfig const &location,
     if (location.autoindex) {
         dir = opendir(path.c_str());
         if (dir == NULL) {
-            response.statusCode = 500;
-            response.statusMessage = "Internal Server Error";
-            response.body = "<h1>500 Internal Server Error</h1>";
-            response.headers["Content-Type"] = "text/html";
-            response.headers["Content-Length"] =
-                toString(response.body.size());
-            return response;
+			return (buildError(500, "Internal server error", config));
         }
         response.body = "<html><body><h1>Index of: " + path + "</h1><ul>";
         while ((entry = readdir(dir)) != NULL) {
@@ -117,51 +111,26 @@ HttpResponse isDir(LocationConfig const &location,
             toString(response.body.size());
         return response;
     } else {
-        response.statusCode = 403;
-        response.statusMessage = "Forbidden";
-        response.body = "<h1>403 Forbidden1</h1>";
-        response.headers["Content-Type"] = "text/html";
-        response.headers["Content-Length"] =
-            toString(response.body.size());
-        return response;
+		return(buildError(403, "Forbidden", config));
     }
 }
 
-HttpResponse handleGet(LocationConfig const &location, std::string path)
+HttpResponse handleGet(LocationConfig const &location, std::string path, ServerConfig const &config)
 {
     HttpResponse response;
     struct stat  fileInfo;
 
-    if (stat(path.c_str(), &fileInfo) < 0) {
-        response.statusCode = 404;
-        response.statusMessage = "Not Found";
-        response.body = "<h1>404 Not Found</h1>";
-        response.headers["Content-Type"] = "text/html";
-        response.headers["Content-Length"] =
-            toString(response.body.size());
-        return response;
-    }
+    if (stat(path.c_str(), &fileInfo) < 0)
+		return (buildError(404, "Not found", config));
     if (S_ISDIR(fileInfo.st_mode)) {
-        return isDir(location, path, response);
+        return isDir(location, path, response, config);
     } else if (S_ISREG(fileInfo.st_mode)) {
         if (access(path.c_str(), R_OK) < 0) {
-            response.statusCode = 403;
-            response.statusMessage = "Forbidden";
-            response.body = "<h1>403 Forbidden</h1>";
-            response.headers["Content-Type"] = "text/html";
-            response.headers["Content-Length"] =
-                toString(response.body.size());
-            return response;
+			return(buildError(403, "Forbidden", config));
         }
-        return serveFile(path);
+        return serveFile(path, config);
     }
-    response.statusCode = 404;
-    response.statusMessage = "Not Found";
-    response.body = "<h1>404 Not Found</h1>";
-    response.headers["Content-Type"] = "text/html";
-    response.headers["Content-Length"] =
-        toString(response.body.size());
-    return response;
+	return(buildError(404, "Not found", config));
 }
 
 HttpResponse handlePost(const HttpRequest& request,

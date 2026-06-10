@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 12:31:56 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/10 13:00:46 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,20 +142,13 @@ std::string getMimeType(const std::string &path)
     return "application/octet-stream";
 }
 
-HttpResponse serveFile(const std::string &path)
+HttpResponse serveFile(const std::string &path, const ServerConfig &config)
 {
     HttpResponse response;
     int fd = open(path.c_str(), O_RDONLY);
 
-    if (fd < 0) {
-        response.statusCode = 404;
-        response.statusMessage = "Not Found";
-        response.body = "<html><body><h1>404 Not Found/SERVEFILE</h1></body></html>";
-        response.headers["Content-Type"] = "text/html";
-        response.headers["Content-Length"] = "47";
-        std::cout << "Error trying to find : " << path << "\n";
-        return response;
-    }
+    if (fd < 0)
+		return (buildError(404, "Not found", config));
 
     char buf[4096];
     ssize_t bytes;
@@ -187,16 +180,12 @@ HttpResponse execute(const HttpRequest &req,
         if (loc.methods[i] == req.method)
             allowed = true;
     }
-
     if (!allowed) {
         return (buildError(405, "Not allowed", server));
     }
     std::string path = resolvePath(req, loc);
-
-    //std::cout << "Method called : " << req.method << "\n";
-
     if (req.method == "GET")
-        return handleGet(loc, path);
+        return handleGet(loc, path, server);
     else if (req.method == "POST")
         return handlePost(req, loc, server, path);
     else if (req.method == "DELETE")
