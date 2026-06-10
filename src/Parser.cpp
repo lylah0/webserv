@@ -94,15 +94,20 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
             loc.upload_enabled = true;
             continue;
         }
+        if (key == "return"){
+			loc.redirectNum = atoi(tokens[i++].c_str());
+			std::string val = tokens[i];
+			loc.redirect = val;
+		}
         std::string value = tokens[i++];
         if (tokens[i] != ";")
-            throw std::runtime_error("Expected ';'");
+		throw std::runtime_error("Expected ';'");
         ++i;
         if (key == "root") loc.root = value;
         else if (key == "index") loc.index = value;
         else if (key == "autoindex") loc.autoindex = (value == "on");
-        else if (key == "return") loc.redirect = value;
-        else
+        else if (key == "return") continue;
+		else
             throw std::runtime_error("Unknown directive in location: " + key);
     }
     ++i;
