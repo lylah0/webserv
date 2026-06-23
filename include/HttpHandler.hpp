@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:17:37 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 12:34:13 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/23 21:40:21 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,11 @@ struct MultipartPart {
 };
 
 HttpRequest		parseRequest(std::string const &buffer, size_t bodyOffset, size_t bodyLength);
-HttpResponse	serveFile(const std::string &fullPath);
+HttpResponse	serveFile(const std::string &fullPath, ServerConfig const &config);
 HttpResponse	buildError(int code, std::string const &message, ServerConfig const &config);
 HttpResponse	execute(HttpRequest const &req, LocationConfig const &loc, ServerConfig const &server);
 LocationConfig	route(HttpRequest const &req, ServerConfig const &config);
-HttpResponse	handleGet(LocationConfig const &location, std::string path);
+HttpResponse	handleGet(LocationConfig const &location, std::string path, ServerConfig const &config);
 HttpResponse	handlePost(const HttpRequest& request, const LocationConfig& location, const ServerConfig& server, const std::string& path);
 HttpResponse	handleDelete(const std::string& path, const ServerConfig& server);
 std::string		resolvePath(const HttpRequest &req, const LocationConfig &loc);

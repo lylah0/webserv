@@ -48,9 +48,13 @@ public :
     ~ClientConnection();
 
     std::string const& getReadBuffer() const;
+    std::string& getMutableReadBuffer();
+    void eraseReadBytes(size_t n);
+    void appendToReadBuffer(const char* data, size_t len);
     void popReadBytes(size_t n);
 
     void enqueueResponse(const std::string &resp);
+    void replaceReadBuffer(const std::string& s);
     bool hasPendingResponses() const;
     const std::string &currentResponse() const;
     void popResponse();

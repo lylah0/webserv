@@ -23,6 +23,7 @@ struct	HttpResponse{
 	std::map<std::string, std::string>	headers;
 	std::string							body;
 	bool								isCGIPending;
+	bool								isChunkedPending;
 };
 
 #endif

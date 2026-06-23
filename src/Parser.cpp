@@ -61,6 +61,8 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
     LocationConfig loc;
     loc.autoindex = false;
     loc.upload_enabled = false;
+    loc.has_client_max_body_size = false;
+    loc.client_max_body_size = 0;
 
     if (tokens[i] != "location")
         throw std::runtime_error("Expected 'location'");
@@ -94,15 +96,29 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
             loc.upload_enabled = true;
             continue;
         }
+        if (key == "return"){
+			loc.redirectNum = atoi(tokens[i++].c_str());
+			std::string val = tokens[i];
+			loc.redirect = val;
+		}
+        if (key == "client_max_body_size")
+        {
+            if (tokens[i] == ";")
+                throw std::runtime_error("Invalid client_max_body_size");
+            loc.client_max_body_size = std::strtoul(tokens[i].c_str(), 0, 10);
+            //std::cerr << "client_max_body_size here : " << loc.client_max_body_size << std::endl;
+            loc.has_client_max_body_size = true;
+        }
         std::string value = tokens[i++];
         if (tokens[i] != ";")
-            throw std::runtime_error("Expected ';'");
+		    throw std::runtime_error("Expected ';'");
         ++i;
         if (key == "root") loc.root = value;
         else if (key == "index") loc.index = value;
         else if (key == "autoindex") loc.autoindex = (value == "on");
-        else if (key == "return") loc.redirect = value;
-        else
+        else if (key == "return") continue;
+        else if (key == "client_max_body_size") continue;
+		else
             throw std::runtime_error("Unknown directive in location: " + key);
     }
     ++i;
@@ -130,6 +146,8 @@ void ConfigParser::parseTokens(const std::vector<std::string> &tokens) {
             if (tokens[i] == "location")
             {
                 LocationConfig loc = parseLocation(tokens, i);
+                if (!loc.has_client_max_body_size)
+                    loc.client_max_body_size = cfg.client_max_body_size;
                 cfg.locations.push_back(loc);
                 continue;
             }
@@ -259,4 +277,21 @@ HttpResponse parseMultipartAndSave(const std::string& body,
     }
     close(fd);
     return makeUploadResponse(201, "File uploaded", filename);
+}
+
+HttpResponse handleRawPostBody(const HttpRequest& request,
+                               const LocationConfig& location,
+                               const ServerConfig& server)
+{
+    if (location.upload_store.empty())
+        return buildError(400, "Upload directory not configured", server);
+    std::string filepath = location.upload_store + "/upload.bin";
+    int fd = open(filepath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0)
+        return buildError(500, "Failed to open upload file", server);
+    ssize_t written = write(fd, request.body.data(), request.body.size());
+    close(fd);
+    if (written < 0 || (size_t)written != request.body.size())
+        return buildError(500, "Failed to write upload file", server);
+    return makeUploadResponse(201, "Raw upload saved successfully", filepath);
 }
