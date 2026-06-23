@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ClientConnection.hpp                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/13 18:27:14 by lylrandr          #+#    #+#             */
+/*   Updated: 2026/06/10 11:42:56 by lylrandr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef CLIENTCONNECTION_HPP
 #define CLIENTCONNECTION_HPP
 
@@ -5,14 +17,15 @@
 # include <map>
 # include <unistd.h>
 # include <sys/socket.h>
-# include <fstream>
-# include <sstream>
+#  include <fstream>
+#  include <sstream>
 # include <deque>
 # include <cstdlib>
 # include <stdint.h>
 # include <cerrno>
 # include <cstring>
-# include "ServerConfig.hpp"
+#  include "ServerConfig.hpp"
+# include "HttpResponse.hpp"
 # include "HttpResponse.hpp"
 
 class ClientConnection {
@@ -35,10 +48,13 @@ public :
     ~ClientConnection();
 
     std::string const& getReadBuffer() const;
-    void replaceReadBuffer(const std::string& s);
+    std::string& getMutableReadBuffer();
+    void eraseReadBytes(size_t n);
+    void appendToReadBuffer(const char* data, size_t len);
     void popReadBytes(size_t n);
 
     void enqueueResponse(const std::string &resp);
+    void replaceReadBuffer(const std::string& s);
     bool hasPendingResponses() const;
     const std::string &currentResponse() const;
     void popResponse();
@@ -56,6 +72,7 @@ public :
     std::string getBuffer() const;
     size_t getOffset() const;
     int getFd() const;
+	void					clearReadBuffer();
 };
 
 #endif

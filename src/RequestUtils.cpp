@@ -6,45 +6,53 @@
 /*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/08 18:54:45 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/06/23 16:19:03 by cjauregu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/HttpHandler.hpp"
 #include "CGI.hpp"
 
-HttpResponse buildError(int code, std::string const &message, ServerConfig const &config){
-	HttpResponse		response;
-	std::ostringstream	oss;
-	std::string			fullpath;
+HttpResponse buildError(int code, const std::string &message, const ServerConfig &config)
+{
+    HttpResponse response;
+    std::ostringstream oss;
 
-	response.statusCode    = code;
-	response.statusMessage = message;
-	response.headers["Content-Type"] = "text/html";
-	std::cout << "map size: " << config.error_page.size() << std::endl;
-	for (std::map<int, std::string>::const_iterator it = config.error_page.begin(); it != config.error_page.end(); it++)
-		std::cout << "code: " << it->first << " path: " << it->second << std::endl;
-	if (config.error_page.count(code)){
-		fullpath = config.root + config.error_page.at(code);
-		std::cout << "fullpath: [" << fullpath << "]" << std::endl;
-		int fd = open(fullpath.c_str(), O_RDONLY);
-		if (fd >= 0){
-			char	buf[4096];
-			ssize_t	bytes;
-			while ((bytes = read(fd, buf, sizeof(buf))) > 0)
-				response.body.append(buf, bytes);
-			close(fd);
-			oss << response.body.size();
-			response.headers["Content-Length"] = oss.str();
-			return (response);
-		}
-	}
-	oss << code;
-	response.body = "<html><body><h1>" + oss.str() + " " + message + "</h1></body></html>";
-	oss.str("");
-	oss << response.body.size();
-	response.headers["Content-Length"] = oss.str();
-	return (response);
+    std::cerr << "[ERROR] Error Message : " << message << std::endl;
+
+    response.statusCode    = code;
+    response.statusMessage = message;
+    response.headers["Content-Type"] = "text/html";
+    std::map<int, std::string>::const_iterator it = config.error_page.find(code);
+    if (it != config.error_page.end())
+    {
+        std::string fullpath = config.root + it->second;
+        int fd = open(fullpath.c_str(), O_RDONLY);
+
+        if (fd >= 0)
+        {
+            char buf[4096];
+            ssize_t n;
+
+            while ((n = read(fd, buf, sizeof(buf))) > 0)
+            {
+                std::cerr << "Error found here\n" << std::endl;
+                response.body.append(buf, static_cast<size_t>(n));
+            }
+            close(fd);
+            oss << response.body.size();
+            response.headers["Content-Length"] = oss.str();
+            return response;
+        }
+    }
+    oss << code;
+    response.body = "<html><body><h1>" + oss.str() + " " + message + "</h1></body></html>";
+    std::cerr << "ERROR HTTP RESPONSE SENT OUT : " << response.body << std::endl;
+    oss.str("");
+    oss.clear();
+    oss << response.body.size();
+    response.headers["Content-Length"] = oss.str();
+    return response;
 }
 
 bool parseRequestFromBuffer(const std::string &buf, HttpRequest &outReq, size_t &consumed) {
@@ -67,8 +75,12 @@ bool parseRequestFromBuffer(const std::string &buf, HttpRequest &outReq, size_t 
 
     size_t totalNeeded = headerEnd + contentLength;
     if (buf.size() < totalNeeded)
+    {
+        std::cerr << "BUFFER SIZE COMPARED TO TOTALNEEDED" << buf.size() << " | " << totalNeeded << std::endl;
         return false;
+    }
     std::string requestSlice = buf.substr(0, totalNeeded);
+    //std::cerr << "[DEBUG] Request buffer recieved : " << buf << std::endl;
     outReq = parseRequest(requestSlice, headerEnd, contentLength);
     consumed = totalNeeded;
     return true;
@@ -82,7 +94,7 @@ static std::string toString(size_t n) {
 
 HttpResponse isDir(LocationConfig const &location,
                    std::string path,
-                   HttpResponse response)
+                   HttpResponse response, ServerConfig const &config)
 {
     std::ostringstream oss;
     std::string        name;
@@ -92,13 +104,7 @@ HttpResponse isDir(LocationConfig const &location,
     if (location.autoindex) {
         dir = opendir(path.c_str());
         if (dir == NULL) {
-            response.statusCode = 500;
-            response.statusMessage = "Internal Server Error";
-            response.body = "<h1>500 Internal Server Error</h1>";
-            response.headers["Content-Type"] = "text/html";
-            response.headers["Content-Length"] =
-                toString(response.body.size());
-            return response;
+			return (buildError(500, "Internal server error", config));
         }
         response.body = "<html><body><h1>Index of: " + path + "</h1><ul>";
         while ((entry = readdir(dir)) != NULL) {
@@ -117,51 +123,26 @@ HttpResponse isDir(LocationConfig const &location,
             toString(response.body.size());
         return response;
     } else {
-        response.statusCode = 403;
-        response.statusMessage = "Forbidden";
-        response.body = "<h1>403 Forbidden1</h1>";
-        response.headers["Content-Type"] = "text/html";
-        response.headers["Content-Length"] =
-            toString(response.body.size());
-        return response;
+		return(buildError(403, "Forbidden", config));
     }
 }
 
-HttpResponse handleGet(LocationConfig const &location, std::string path)
+HttpResponse handleGet(LocationConfig const &location, std::string path, ServerConfig const &config)
 {
     HttpResponse response;
     struct stat  fileInfo;
 
-    if (stat(path.c_str(), &fileInfo) < 0) {
-        response.statusCode = 404;
-        response.statusMessage = "Not Found";
-        response.body = "<h1>404 Not Found</h1>";
-        response.headers["Content-Type"] = "text/html";
-        response.headers["Content-Length"] =
-            toString(response.body.size());
-        return response;
-    }
+    if (stat(path.c_str(), &fileInfo) < 0)
+		return (buildError(404, "Not found", config));
     if (S_ISDIR(fileInfo.st_mode)) {
-        return isDir(location, path, response);
+        return isDir(location, path, response, config);
     } else if (S_ISREG(fileInfo.st_mode)) {
         if (access(path.c_str(), R_OK) < 0) {
-            response.statusCode = 403;
-            response.statusMessage = "Forbidden";
-            response.body = "<h1>403 Forbidden</h1>";
-            response.headers["Content-Type"] = "text/html";
-            response.headers["Content-Length"] =
-                toString(response.body.size());
-            return response;
+			return(buildError(403, "Forbidden", config));
         }
-        return serveFile(path);
+        return serveFile(path, config);
     }
-    response.statusCode = 404;
-    response.statusMessage = "Not Found";
-    response.body = "<h1>404 Not Found</h1>";
-    response.headers["Content-Type"] = "text/html";
-    response.headers["Content-Length"] =
-        toString(response.body.size());
-    return response;
+	return(buildError(404, "Not found", config));
 }
 
 HttpResponse handlePost(const HttpRequest& request,
@@ -178,19 +159,23 @@ HttpResponse handlePost(const HttpRequest& request,
     if (it == request.headers.end())
         return buildError(400, "Missing Content-Type", server);
     const std::string &contentType = it->second;
-    size_t bpos = contentType.find("boundary=");
-    if (bpos == std::string::npos)
-        return buildError(400, "Missing boundary in Content-Type", server);
-    std::string boundary = contentType.substr(bpos + 9);
-    while (!boundary.empty()) {
-        char c = boundary[boundary.size() - 1];
-        if (c == '\r' || c == '\n' || c == ';' || c == ' ')
-            boundary.erase(boundary.size() - 1);
-        else
-            break;
+    if (contentType.find("multipart/form-data") == 0)
+    {
+        size_t bpos = contentType.find("boundary=");
+        if (bpos == std::string::npos)
+            return buildError(400, "Missing boundary in Content-Type", server);
+        std::string boundary = contentType.substr(bpos + 9);
+        while (!boundary.empty()) {
+            char c = boundary[boundary.size() - 1];
+            if (c == '\r' || c == '\n' || c == ';' || c == ' ')
+                boundary.erase(boundary.size() - 1);
+            else
+                break;
+        }
+        boundary = "--" + boundary;
+        return parseMultipartAndSave(request.body, boundary, location, server);
     }
-    boundary = "--" + boundary;
-    return parseMultipartAndSave(request.body, boundary, location, server);
+    return handleRawPostBody(request, location, server);
 }
 
 

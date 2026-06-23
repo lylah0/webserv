@@ -8,7 +8,6 @@ function sendDelete(path) {
 }
 
 document.getElementById("uploadForm").onsubmit = function (e) {
-    e.preventDefault();
     const formData = new FormData(this);
 
     fetch("/upload", {
