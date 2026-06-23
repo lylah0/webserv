@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 16:50:23 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 11:45:01 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/23 23:09:53 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,8 @@ class PollServer {
 
         PollServer(const PollServer &src);
         PollServer& operator=(const PollServer &rhs);
-
+		void	_handleDisconnect(int clientFd);
+		void	_dispatchRequest(int clientFd, ClientConnection *client, ClientState &state);
         void    _addFd(int fd, short events = POLLIN);
         void    _removeFd(int fd);
         void    _newConnection(int serverFd);
@@ -54,7 +55,10 @@ class PollServer {
         void    _handleCGIRead(int pipeFd);
         void    _finishCGI(int clientFd);
         void    _abortCGI(int clientFd);
-        bool    decodeChunkedBody(ClientConnection* client, ClientState& state);
+
+		bool    decodeChunkedBody(ClientConnection* client, ClientState& state);
+		bool	_assembleBody(int clientFd, ClientConnection *client, ClientState &state);
+		bool	_parseHeaders(int clientFd, ClientConnection *client, ClientState &state);
 
     public:
         PollServer();
@@ -63,6 +67,10 @@ class PollServer {
         void    addServer(ServerConfig const &server);
         void    runServer();
         void    registerCGI(int clientFd, CGIProcess &cgi);
-};
+
+		bool	_buildFinalRequest(ClientConnection *client, ClientState &state, HttpRequest &request);
+		bool	_handleRedirect(int clientFd, ClientConnection *client, ClientState &state, const LocationConfig &loc);
+		bool	_handleCGI(int clientFd, ClientConnection *client, ClientState &state, const HttpRequest &request, const LocationConfig &loc);
+	};
 
 #endif

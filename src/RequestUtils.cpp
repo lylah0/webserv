@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/23 21:41:00 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/24 01:22:48 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,5 @@ HttpResponse handleDelete(const std::string& path, const ServerConfig& server)
     if (unlink(path.c_str()) == -1) {
 		return buildError(500, "Not found", server);
     }
-    makeUploadResponse(204, "Success", "");
-    return res;
+    return makeUploadResponse(204, "Success", "");
 }
