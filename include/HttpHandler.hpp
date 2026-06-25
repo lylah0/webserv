@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:17:37 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 12:57:49 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/23 21:40:21 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ LocationConfig	route(HttpRequest const &req, ServerConfig const &config);
 HttpResponse	handleGet(LocationConfig const &location, std::string path, ServerConfig const &config);
 HttpResponse	handlePost(const HttpRequest& request, const LocationConfig& location, const ServerConfig& server, const std::string& path);
 HttpResponse	handleDelete(const std::string& path, const ServerConfig& server);
-std::string		resolvePath(const HttpRequest &req, const LocationConfig &loc);
+std::string		resolvePath(const HttpRequest &req, const LocationConfig &loc, const ServerConfig &server);
 bool			parseRequestFromBuffer(const std::string &buf, HttpRequest &outReq, size_t &consumed);
 
 #endif

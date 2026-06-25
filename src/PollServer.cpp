@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PollServer.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/23 20:01:54 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/06/24 01:24:10 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,6 +235,8 @@ void PollServer::_handleCGIRead(int pipeFd)
     int status;
     pid_t r = waitpid(cgi.pid, &status, WNOHANG);
     std::cerr << "[CGI PARENT] waitpid=" << r << "\n";
+    if (r == 0)
+        r = waitpid(cgi.pid, &status, 0);
 
     std::string outputBuffer = cgi.outputBuffer;
     _pipeToClient.erase(pipeFd);
@@ -243,16 +245,25 @@ void PollServer::_handleCGIRead(int pipeFd)
     _cgiProcesses.erase(clientFd);
     if (_clients.find(clientFd) == _clients.end())
         return;
-    HttpResponse res = parseCGIOutput(outputBuffer);
-    if (res.statusCode == 500)
+    bool scriptFailed = (r > 0 && WIFEXITED(status) && WEXITSTATUS(status) != 0) || (r > 0 && WIFSIGNALED(status));
+    HttpResponse res;
+    if (scriptFailed || outputBuffer.empty())
     {
-        //std::cerr << "[CGI] ERROR STATUS MESSAGE FOUND HERE : " << res.statusMessage << std::endl;
-        res = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
+        if (scriptFailed)
+            res = buildError(500, "Internal Server Error (Script Error)", _clientConfig[clientFd]);
+        else
+            res = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
+    }
+    else
+    {
+        res = parseCGIOutput(outputBuffer);
+        if (res.statusCode == 500)
+            res = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
     }
     //std::cerr << "[CGI READ] n=" << n << "\n";
+    std::string().swap(outputBuffer);
     ClientConnection *client = _clients[clientFd];
     client->prepResponse(res);
-    client->handleWrite();
     _enableWrite(clientFd);
 }
 
@@ -277,6 +288,7 @@ void PollServer::_finishCGI(int clientFd) {
     HttpResponse response = parseCGIOutput(output);
     if (response.statusCode == 500)
         response = buildError(500, "Internal Server Error2", _clientConfig[clientFd]);
+    std::string().swap(output);
     _clients[clientFd]->prepResponse(response);
     _enableWrite(clientFd);
 }
@@ -308,230 +320,258 @@ void PollServer::_abortCGI(int clientFd) {
         return;
     ClientConnection *client = _clients[clientFd];
     client->prepResponse(buildError(504, "Gateway Timeout", _clientConfig[clientFd]));
-    client->handleWrite();
     _enableWrite(clientFd);
 }
 
+/*	Orchestre le traitement d'un client prêt en lecture/écriture.
+	Lit le socket, ferme proprement si déconnexion, puis enchaine
+	parsing headers -> assemblage body -> dispatch. Sort tot (return a poll)
+	des qu'une etape signale qu'il manque des donnees ou qu'une reponse est deja en file. */
 void PollServer::_clientEvent(size_t index)
 {
     int clientFd = _fds[index].fd;
     if (_clients.find(clientFd) == _clients.end())
         return;
-
     ClientConnection *client = _clients[clientFd];
     ClientState &state = _states[clientFd];
-    if (!client->handleRead()) {
-        _abortCGI(clientFd);
-        //std::cerr << "CGI ABORTED RIGHT HERE AFTER CHECKING HANDLEREAD" << std::endl;
-        delete client;
-        _clients.erase(clientFd);
-        _states.erase(clientFd);
-        _clientConfig.erase(clientFd);
-        _removeFd(clientFd);
-        close(clientFd);
+    if (!client->handleRead()){
+        _handleDisconnect(clientFd);
         return;
     }
-    while (true)
-    {
-        const std::string &buf = client->getReadBuffer();
-        if (buf.empty())
-            return;
-        if (!state.headersComplete)
-        {
-            size_t headerEnd = buf.find("\r\n\r\n");
-            if (headerEnd == std::string::npos)
-                break;
-            state.headersComplete = true;
-            HttpRequest tempReq;
-            size_t consumed = 0;
-            bool ok = parseRequestFromBuffer(buf, tempReq, consumed);
-            if (!ok) {
-                size_t headerEnd = buf.find("\r\n\r\n");
-                if (headerEnd != std::string::npos) {
-                    size_t bodyStart = headerEnd + 4;
-                    size_t bodySize = buf.size() - bodyStart;
-                    if (bodySize < state.contentLength) {
-                        break;
-                    }
-                }
-                client->prepResponse(buildError(400, "Bad Requestballs", _clientConfig[clientFd]));
-                _enableWrite(clientFd);
-                state = ClientState();
-                state.closeAfterWrite = true;
-                return;
-            }
-            LocationConfig locEarly = route(tempReq, _clientConfig[clientFd]);
-            state.maxBodySize = locEarly.client_max_body_size;
-            if (tempReq.headers.count("Transfer-Encoding") &&
-                tempReq.headers.at("Transfer-Encoding") == "chunked")
-            {
-                state.isChunked = true;
-                state.contentLength = 0;
-            }
-            else if (tempReq.headers.count("Content-Length"))
-            {
-                state.contentLength = std::atoi(tempReq.headers.at("Content-Length").c_str());
-            }
-            else
-            {
-                state.contentLength = 0;
-            }
-            if (!state.isChunked &&
-                state.maxBodySize > 0 &&
-                state.contentLength > state.maxBodySize)
-            {
-                client->prepResponse(buildError(413, "Request Entity Too Large", _clientConfig[clientFd]));
-                _enableWrite(clientFd);
-                state = ClientState();
-                state.closeAfterWrite = true;
-                return;
-            }
+    if (client->getReadBuffer().empty())
+        return;
+    if (!_parseHeaders(clientFd, client, state))
+        return;
+    if (!_assembleBody(clientFd, client, state))
+        return;
+    _dispatchRequest(clientFd, client, state);
+}
+
+/*Nettoie et ferme un client deconnecte : abort du CGI eventuel,
+ suppression de ses entrees dans les maps (_clients, _states, _clientConfig),
+ retrait du fd de poll et close().*/
+void PollServer::_handleDisconnect(int clientFd)
+{
+    _abortCGI(clientFd);
+    delete _clients[clientFd];
+    _clients.erase(clientFd);
+    _states.erase(clientFd);
+    _clientConfig.erase(clientFd);
+    _removeFd(clientFd);
+    close(clientFd);
+}
+/*	Parse la ligne de requete + les headers une fois "\r\n\r\n" recu.
+	Determine le mode du body (chunked via Transfer-Encoding, sinon Content-Length),
+	fixe maxBodySize depuis la route, et rejette tot (413) si Content-Length depasse.
+	Retourne false si headers incomplets (on attend plus de donnees) ou si une erreur a ete envoyee.*/
+bool PollServer::_parseHeaders(int clientFd, ClientConnection *client, ClientState &state){
+    if (state.headersComplete)
+        return true;
+    const std::string &buf = client->getReadBuffer();
+    size_t headerEnd = buf.find("\r\n\r\n");
+    if (headerEnd == std::string::npos)
+        return false;
+    state.headersComplete = true;
+
+    std::string headerBlock = buf.substr(0, headerEnd);
+    if (headerBlock.find("Transfer-Encoding: chunked") != std::string::npos){
+        state.isChunked = true;
+        state.contentLength = 0;
+    }
+    else {
+        size_t clPos = headerBlock.find("Content-Length:");
+        if (clPos == std::string::npos)
+            state.contentLength = 0;
+        else {
+            clPos += 15;
+            while (clPos < headerBlock.size() && headerBlock[clPos] == ' ')
+                ++clPos;
+            state.contentLength = std::atoi(headerBlock.c_str() + clPos);
+        }
+    }
+    HttpRequest tempReq;
+    size_t consumed = 0;
+    if (!parseRequestFromBuffer(buf, tempReq, consumed))
+        return false;
+    LocationConfig locEarly = route(tempReq, _clientConfig[clientFd]);
+    state.maxBodySize = locEarly.client_max_body_size;
+    if (!state.isChunked && state.maxBodySize > 0 && state.contentLength > state.maxBodySize){
+        client->prepResponse(buildError(413, "Request Entity Too Large", _clientConfig[clientFd]));
+        _enableWrite(clientFd);
+        state = ClientState();
+        state.closeAfterWrite = true;
+        return false;
+    }
+    return true;
+}
+
+/*	Assemble le corps de la requete selon le mode detecte.
+	Branche chunked : delegue a decodeChunkedBody et controle la taille.
+	Branche normale : attend que bodySize atteigne contentLength puis copie le body.
+	Verifie maxBodySize (413). Retourne false tant que le body n'est pas complet.*/
+bool PollServer::_assembleBody(int clientFd, ClientConnection *client, ClientState &state)
+{
+    if (state.requestReady)
+        return true;
+    const std::string &buf = client->getReadBuffer();
+    if (state.isChunked){
+        if (!decodeChunkedBody(client, state))
+            return false;
+        if (state.chunkedError){
+            client->prepResponse(buildError(413, "Request Entity Too Large", _clientConfig[clientFd]));
+            _enableWrite(clientFd);
+            std::string().swap(state.body);
+            state = ClientState();
+            state.closeAfterWrite = true;
+            return false;
+        }
+        if (state.maxBodySize > 0 && state.bodyBytesRead > state.maxBodySize){
+            client->prepResponse(buildError(413, "Request Entity Too Large", _clientConfig[clientFd]));
+            _enableWrite(clientFd);
+            std::string().swap(state.body);
+            state = ClientState();
+            state.closeAfterWrite = true;
+            return false;
         }
         if (!state.requestReady)
-        {
-            if (state.isChunked)
-            {
-                if (!decodeChunkedBody(client, state))
-                    break;
-                if (state.chunkedError)
-                {
-                    client->prepResponse(buildError(413, "Request Entity Too Large", _clientConfig[clientFd]));
-                    _enableWrite(clientFd);
-                    state = ClientState();
-                    state.closeAfterWrite = true;
-                    return;
-                }
-
-                if (state.maxBodySize > 0 &&
-                    state.bodyBytesRead > state.maxBodySize)
-                {
-                    client->prepResponse(buildError(413, "Request Entity Too Large", _clientConfig[clientFd]));
-                    _enableWrite(clientFd);
-                    state = ClientState();
-                    state.closeAfterWrite = true;
-                    return;
-                }
-
-                if (!state.requestReady)
-                    return;
-            }
-            else
-            {
-                size_t headerEnd = buf.find("\r\n\r\n");
-                size_t bodyStart = headerEnd + 4;
-                size_t bodySize = buf.size() - bodyStart;
-
-                if (bodySize < state.contentLength)
-                    return;
-
-                if (state.maxBodySize > 0 &&
-                    bodySize > state.maxBodySize)
-                {
-                    client->prepResponse(buildError(413, "Request Entity Too Large", _clientConfig[clientFd]));
-                    _enableWrite(clientFd);
-                    state = ClientState();
-                    state.closeAfterWrite = true;
-                    return;
-                }
-
-                state.body = buf.substr(bodyStart, bodySize);
-                state.bodyBytesRead = bodySize;
-                state.requestReady = true;
-            }
-        }
-
-        if (!state.requestReady)
-            return;
-        HttpRequest request;
-        size_t consumed = 0;
-
-        if (state.isChunked)
-        {
-            size_t headerEnd = buf.find("\r\n\r\n");
-            if (headerEnd == std::string::npos)
-                break;
-
-            request = parseRequest(buf.substr(0, headerEnd + 4), headerEnd + 4, 0);
-            request.body = state.body;
-            consumed = state.pos;
-        }
-        else
-        {
-            if (!parseRequestFromBuffer(buf, request, consumed))
-                break;
-        }
-        client->popReadBytes(consumed);
-        LocationConfig loc = route(request, _clientConfig[clientFd]);
-        if (!loc.redirect.empty())
-        {
-            HttpResponse redir;
-            redir.statusCode = 301;
-            redir.statusMessage = "Moved Permanently";
-            redir.headers["Location"] = loc.redirect;
-            redir.headers["Content-Length"] = "0";
-
-            client->prepResponse(redir);
+            return false;
+    }
+    else {
+        size_t headerEnd = buf.find("\r\n\r\n");
+        size_t bodyStart = headerEnd + 4;
+        size_t bodySize = buf.size() - bodyStart;
+        if (bodySize < state.contentLength)
+            return false;
+        if (state.maxBodySize > 0 && bodySize > state.maxBodySize){
+            client->prepResponse(buildError(413, "Request Entity Too Large", _clientConfig[clientFd]));
             _enableWrite(clientFd);
             state = ClientState();
-            return;
+            state.closeAfterWrite = true;
+            return false;
         }
-        std::string test_path = resolvePath(request, loc);
-        std::cerr << "RESOLVEPATH : " << test_path << std::endl;
-        std::string ext = getExtension(test_path);
-        const LocationConfig* extLocPtr = findExtensionLocation(_clientConfig[clientFd], request.uri, test_path, ext);
-        const LocationConfig& extLoc = (extLocPtr ? *extLocPtr : loc);
-        std::string path = resolvePath(request, extLoc);
-        std::cerr << "PATH RESOLVED AS : " << path << std::endl;
-        std::cerr << "CGI LOCATION BLOCK CHOSEN : " << extLoc.path << std::endl;
-        std::cerr << "CGI LOCATION BLOCK DEFAULT : " << loc.path << std::endl;
-        if (isCGIvalid(extLoc, ext, request.method) && (request.method == "GET" || request.method == "POST"))
-        {
-            std::cerr << "[CGI] validation check" << std::endl;
-            std::string isvalid = CGI_validation_check(path);
-            if (isvalid != "CGI validated" && isvalid != "Non CGI")
-            {
-                HttpResponse response;
-                if (isvalid == "Extension error" || isvalid == "Is regular file")
-                    response = buildError(400, "Bad Request", _clientConfig[clientFd]);
-                else if (isvalid == "File non existent")
-                    response = buildError(404, "Not Found", _clientConfig[clientFd]);
-                else if (isvalid == "Not executable")
-                    response = buildError(403, "Forbidden", _clientConfig[clientFd]);
-                else
-                    response = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
-                client->prepResponse(response);
-                _enableWrite(clientFd);
-                state = ClientState();
-                state.closeAfterWrite = true;
-                return;
-            }
-            if (isvalid == "CGI validated")
-            {
-                //std::cerr << "[CGI] CGI VALIDATED AND PROCESSING..." << std::endl;
-                //std::cerr << "[CGI] CGI LOCATION GIVEN : " << extLoc->path << std::endl;
-                try {
-                    CGIProcess cgi = launchCGI(request, _clientConfig[clientFd], extLoc, path);
-                    registerCGI(clientFd, cgi);
-                } catch (...) {
-                    client->prepResponse(buildError(500, "Internal Server Error", _clientConfig[clientFd]));
-                    _enableWrite(clientFd);
-                    state = ClientState();
-                    state.closeAfterWrite = true;
-                    return;
-                }
-                state = ClientState();
-                return;
-            }
-            //if (isvalid == "Non CGI")
-                //std::cerr << "[CGI] Program marked file as non CGI" << std::endl;
-        }
-        HttpResponse response = execute(request, loc, _clientConfig[clientFd]);
+        state.body = buf.substr(bodyStart, bodySize);
+        state.bodyBytesRead = bodySize;
+        state.requestReady = true;
+    }
+    return true;
+}
+
+
+/*	Aiguille une requete complete : construit le HttpRequest final,
+	resout la route, puis tente redirection -> CGI -> sinon execute() classique.
+	Prepare la reponse et active l'ecriture (POLLOUT).*/
+void PollServer::_dispatchRequest(int clientFd, ClientConnection *client, ClientState &state)
+{
+    HttpRequest request;
+    if (!_buildFinalRequest(client, state, request))
+        return;
+    LocationConfig loc = route(request, _clientConfig[clientFd]);
+    std::cerr << "ROUTE CALLED HERE : " << loc.path << std::endl;
+    if (_handleRedirect(clientFd, client, state, loc))
+        return;
+    if (_handleCGI(clientFd, client, state, request, loc))
+        return;
+    HttpResponse response = execute(request, loc, _clientConfig[clientFd]);
+    client->prepResponse(response);
+    _enableWrite(clientFd);
+    std::string().swap(state.body);
+    state = ClientState();
+}
+
+/*	Reconstruit le HttpRequest final a partir du buffer.
+	Cas chunked : re-parse les headers seuls et rattache le body deja decode.
+	Cas normal : parseRequestFromBuffer. Consomme les octets traites (popReadBytes).
+	Retourne false si le parsing echoue.*/
+bool PollServer::_buildFinalRequest(ClientConnection *client, ClientState &state, HttpRequest &request)
+{
+    const std::string &buf = client->getReadBuffer();
+    size_t consumed = 0;
+    if (state.isChunked){
+        size_t headerEnd = buf.find("\r\n\r\n");
+        if (headerEnd == std::string::npos)
+            return false;
+        request = parseRequest(buf.substr(0, headerEnd + 4), headerEnd + 4, 0);
+        request.body = state.body;
+        consumed = state.pos;
+    }
+    else {
+        if (!parseRequestFromBuffer(buf, request, consumed))
+            return false;
+    }
+    client->popReadBytes(consumed);
+    if (client->getReadBuffer().empty())
+        client->resetReadState();
+    return true;
+}
+
+/*	Traite une redirection si la route en definit une (301 Moved Permanently).
+	Prepare la reponse, active l'ecriture, reset l'etat. Retourne true si une
+	redirection a ete emise, false sinon (la requete continue son chemin normal).*/
+bool PollServer::_handleRedirect(int clientFd, ClientConnection *client, ClientState &state, const LocationConfig &loc)
+{
+    if (loc.redirect.empty())
+        return false;
+    HttpResponse redir;
+    redir.statusCode = 301;
+    redir.statusMessage = "Moved Permanently";
+    redir.headers["Location"] = loc.redirect;
+    redir.headers["Content-Length"] = "0";
+    client->prepResponse(redir);
+    _enableWrite(clientFd);
+    state = ClientState();
+    return true;
+}
+
+/*	Tente de traiter la requete comme un CGI.
+	Resout le chemin, choisit le bon location block par extension, valide le script.
+	Lance le CGI ou emet l'erreur adequate (400/403/404/500). Retourne true si la
+	requete a ete prise en charge ici, false si ce n'est pas un CGI (-> execute()).*/
+bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState &state, const HttpRequest &request, const LocationConfig &loc)
+{
+    std::string test_path = resolvePath(request, loc, _clientConfig[clientFd]);
+    std::cerr << "RESOLVEPATH : " << test_path << std::endl;
+    std::string ext = getExtension(test_path);
+    const LocationConfig* extLocPtr = findExtensionLocation(_clientConfig[clientFd], request.uri, test_path, ext);
+    const LocationConfig& extLoc = (extLocPtr ? *extLocPtr : loc);
+    std::string path = resolvePath(request, loc, _clientConfig[clientFd]);
+    std::cerr << "PATH RESOLVED AS : " << path << std::endl;
+    std::cerr << "CGI LOCATION BLOCK CHOSEN : " << extLoc.path << std::endl;
+    std::cerr << "CGI LOCATION BLOCK DEFAULT : " << loc.path << std::endl;
+    if (!isCGIvalid(extLoc, ext, request.method) || (request.method != "GET" && request.method != "POST"))
+        return false;
+    std::cerr << "[CGI] validation check" << std::endl;
+    std::string isvalid = CGI_validation_check(path);
+    if (isvalid != "CGI validated" && isvalid != "Non CGI"){
+        HttpResponse response;
+        if (isvalid == "Extension error" || isvalid == "Is regular file")
+            response = buildError(400, "Bad Request", _clientConfig[clientFd]);
+        else if (isvalid == "File non existent")
+            response = buildError(404, "Not Found", _clientConfig[clientFd]);
+        else if (isvalid == "Not executable")
+            response = buildError(403, "Forbidden", _clientConfig[clientFd]);
+        else
+            response = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
         client->prepResponse(response);
         _enableWrite(clientFd);
-
         state = ClientState();
-        return;
+        state.closeAfterWrite = true;
+        return true;
     }
+    if (isvalid == "CGI validated"){
+        try {
+            CGIProcess cgi = launchCGI(request, _clientConfig[clientFd], extLoc, path);
+            registerCGI(clientFd, cgi);
+        } catch (...) {
+            client->prepResponse(buildError(500, "Internal Server Error", _clientConfig[clientFd]));
+            _enableWrite(clientFd);
+            state = ClientState();
+            state.closeAfterWrite = true;
+            return true;
+        }
+        state = ClientState();
+        return true;
+    }
+    return false;
 }
 
 void PollServer::addServer(ServerConfig const &server) {
@@ -545,7 +585,7 @@ void PollServer::runServer() {
         time_t now = time(NULL);
         for (std::map<int, CGIProcess>::iterator it = _cgiProcesses.begin();
              it != _cgiProcesses.end(); ) {
-            if (now - it->second.startTime > 30) {
+            if (now - it->second.startTime > 60) {
                 int clientFd = it->first;
                 std::cerr << "[CGI] Timeout for client fd=" << clientFd << "\n";
                 ++it;
@@ -555,11 +595,8 @@ void PollServer::runServer() {
             }
         }
         int ret = poll(&_fds[0], _fds.size(), 1000);
-        if (ret < 0) {
-            if (errno == EINTR)
-                continue;
+        if (ret < 0)
             throw std::runtime_error("poll() failed");
-        }
         for (size_t i = 0; i < _fds.size(); ++i) {
             int   fd      = _fds[i].fd;
             short revents = _fds[i].revents;
@@ -568,7 +605,6 @@ void PollServer::runServer() {
                 continue;
             _fds[i].revents = 0;
             size_t sizeBefore = _fds.size();
-
             if (_pipeToClient.find(fd) != _pipeToClient.end()) {
                 int clientFd = _pipeToClient[fd];
                 if (_cgiProcesses.find(clientFd) == _cgiProcesses.end())

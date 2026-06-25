@@ -28,7 +28,6 @@ int main(int ac, char **av){
 		ConfigParser parser(ac, av);
 		parser.parse();
 		std::vector<ServerConfig> const &servers = parser.getServers();
-
 		PollServer pollServer;
 		for (size_t i = 0; i < servers.size(); i++)
 			pollServer.addServer(servers[i]);

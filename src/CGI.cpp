@@ -6,7 +6,6 @@
 #include <fcntl.h>     // open, fcntl
 #include <unistd.h>    // write, close, execve
 #include <cstdio>      // sprintf
-#include <cstring>     // strlen
 #include <sys/types.h> // pid_t
 #include <sys/stat.h>  // open modes
 #include "HttpRequest.hpp"
@@ -14,7 +13,7 @@
 #include "ServerConfig.hpp"
 #include "LocationConfig.hpp"
 #include "SocketUtils.hpp"
-	
+
 static std::string toString(size_t n) {
     std::stringstream ss;
     ss << n;
@@ -38,56 +37,55 @@ std::string getExtension(const std::string &path) {
 }
 
 const LocationConfig* findExtensionLocation(const ServerConfig& server,
-                                            const std::string& uri,
-                                            const std::string& resolvedPath,
-                                            const std::string& ext)
+											const std::string& uri,
+											const std::string& resolvedPath,
+											const std::string& ext)
 {
-    std::string uriNoQuery = uri;
-    size_t qpos = uriNoQuery.find('?');
-    if (qpos != std::string::npos)
-        uriNoQuery.erase(qpos);
-    if (uriNoQuery.empty() || uriNoQuery[0] != '/')
-        uriNoQuery = "/" + uriNoQuery;
-    std::string filename;
-    size_t lastSlash = resolvedPath.find_last_of('/');
-    if (lastSlash == std::string::npos)
-        filename = resolvedPath;
-    else
-        filename = resolvedPath.substr(lastSlash + 1);
-    const LocationConfig* best = nullptr;
-    size_t bestLen = 0;
-    for (size_t i = 0; i < server.locations.size(); ++i) {
-        const LocationConfig& L = server.locations[i];
-        std::string locPath = L.path;
-        if (locPath.empty()) locPath = "/";
-        if (locPath.size() > 1 && locPath.back() == '/')
-            locPath.pop_back();
-        bool prefixMatch = false;
-        if (locPath == "/") {
-            prefixMatch = true;
-        } else if (uriNoQuery.compare(0, locPath.size(), locPath) == 0) {
-            if (uriNoQuery.size() == locPath.size() || uriNoQuery[locPath.size()] == '/')
-                prefixMatch = true;
-        }
-        if (!prefixMatch)
-            continue;
-        if (!ext.empty() && L.cgi.find(ext) != L.cgi.end()) {
-            if (locPath.size() > bestLen) {
-                bestLen = locPath.size();
-                best = &L;
-            }
-            continue;
-        }
-        if (!filename.empty()) {
-            std::string fileLoc = "/" + filename;
-            if (locPath == fileLoc && locPath.size() > bestLen) {
-                bestLen = locPath.size();
-                best = &L;
-            }
-        }
-    }
-
-    return best;
+	std::string uriNoQuery = uri;
+	size_t qpos = uriNoQuery.find('?');
+	if (qpos != std::string::npos)
+		uriNoQuery.erase(qpos);
+	if (uriNoQuery.empty() || uriNoQuery[0] != '/')
+		uriNoQuery = "/" + uriNoQuery;
+	std::string filename;
+	size_t lastSlash = resolvedPath.find_last_of('/');
+	if (lastSlash == std::string::npos)
+		filename = resolvedPath;
+	else
+		filename = resolvedPath.substr(lastSlash + 1);
+	const LocationConfig* best = NULL;
+	size_t bestLen = 0;
+	for (size_t i = 0; i < server.locations.size(); ++i) {
+		const LocationConfig& L = server.locations[i];
+		std::string locPath = L.path;
+		if (locPath.empty()) locPath = "/";
+		if (locPath.size() > 1 && locPath[locPath.size() - 1] == '/')
+			locPath.erase(locPath.size() - 1);
+		bool prefixMatch = false;
+		if (locPath == "/") {
+			prefixMatch = true;
+		} else if (uriNoQuery.compare(0, locPath.size(), locPath) == 0) {
+			if (uriNoQuery.size() == locPath.size() || uriNoQuery[locPath.size()] == '/')
+				prefixMatch = true;
+		}
+		if (!prefixMatch)
+			continue;
+		if (!ext.empty() && L.cgi.find(ext) != L.cgi.end()) {
+			if (locPath.size() > bestLen) {
+				bestLen = locPath.size();
+				best = &L;
+			}
+			continue;
+		}
+		if (!filename.empty()) {
+			std::string fileLoc = "/" + filename;
+			if (locPath == fileLoc && locPath.size() > bestLen) {
+				bestLen = locPath.size();
+				best = &L;
+			}
+		}
+	}
+	return best;
 }
 
 bool isCGIvalid(const LocationConfig& extLoc,
@@ -246,14 +244,12 @@ void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
    // std::cerr << "[CGI CHILD] start, fullPath=" << fullPath << "\n";
     close(inPipe[1]);
     close(outPipe[0]);
-    if (dup2(inPipe[0], STDIN_FILENO) == -1) {
-      //  std::cerr << "[CGI CHILD] dup2(stdin) failed: " << strerror(errno) << "\n";
+    if (dup2(inPipe[0], STDIN_FILENO) == -1)
         _exit(1);
-    }
-    if (dup2(outPipe[1], STDOUT_FILENO) == -1) {
-       // std::cerr << "[CGI CHILD] dup2(stdout) failed: " << strerror(errno) << "\n";
+    if (dup2(outPipe[1], STDOUT_FILENO) == -1)
         _exit(1);
-    }
+    if (dup2(outPipe[1], STDERR_FILENO) == -1)
+        exit(1);
     close(inPipe[0]);
     close(outPipe[1]);
     std::string ext = getExtension(fullPath);
@@ -272,10 +268,8 @@ void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
         scriptDir  = fullPath.substr(0, lastSlash);
         scriptFile = fullPath.substr(lastSlash + 1);
     }
-    if (chdir(scriptDir.c_str()) == -1) {
-     //   std::cerr << "[CGI CHILD] chdir failed: " << strerror(errno) << "\n";
+    if (chdir(scriptDir.c_str()) == -1)
         _exit(1);
-    }
   //  std::cerr << "[CGI CHILD] chdir to " << scriptDir << ", script=" << scriptFile << "\n";
 
     char *argv[3];
@@ -316,9 +310,6 @@ void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
     }*/
     //std::cerr << " ENVP DEBUG SEEN ABOVE" << std::endl;
     execve(interp, argv, envp);
-    //std::cerr << "[CGI CHILD] execve FAILED errno=" << errno 
-          //<< " (" << strerror(errno) << ")\n";
-    //std::cerr << "[CGI CHILD] execve FAILED: " << strerror(errno) << "\n";
     _exit(1);
 }
 
@@ -426,8 +417,11 @@ CGIProcess launchCGI(const HttpRequest &req,
     }
     if (pid == 0) {
         runCGIChild(loc, fullPath, inPipe, outPipe, envp);
+        _exit(1);
     }
-
+    for (int i = 0; envp[i] != NULL; i++)
+        free(envp[i]);
+    delete[] envp;
     //std::cerr << "[CGI] fork OK, pid=" << pid << "\n";
 
     close(inPipe[0]);

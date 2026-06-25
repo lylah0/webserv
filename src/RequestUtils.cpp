@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/23 16:19:03 by cjauregu         ###   ########.fr       */
+/*   Updated: 2026/06/24 01:22:48 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,19 +35,20 @@ HttpResponse buildError(int code, const std::string &message, const ServerConfig
             ssize_t n;
 
             while ((n = read(fd, buf, sizeof(buf))) > 0)
-            {
-                std::cerr << "Error found here\n" << std::endl;
                 response.body.append(buf, static_cast<size_t>(n));
+            if (n < 0)
+                close(fd);
+            else if (n == 0)
+            {
+                close(fd);
+                oss << response.body.size();
+                response.headers["Content-Length"] = oss.str();
+                return response;
             }
-            close(fd);
-            oss << response.body.size();
-            response.headers["Content-Length"] = oss.str();
-            return response;
         }
     }
     oss << code;
     response.body = "<html><body><h1>" + oss.str() + " " + message + "</h1></body></html>";
-    std::cerr << "ERROR HTTP RESPONSE SENT OUT : " << response.body << std::endl;
     oss.str("");
     oss.clear();
     oss << response.body.size();
@@ -77,6 +78,7 @@ bool parseRequestFromBuffer(const std::string &buf, HttpRequest &outReq, size_t 
     if (buf.size() < totalNeeded)
     {
         std::cerr << "BUFFER SIZE COMPARED TO TOTALNEEDED" << buf.size() << " | " << totalNeeded << std::endl;
+        std::cerr << "BUFFER HERE : " << buf << std::endl;
         return false;
     }
     std::string requestSlice = buf.substr(0, totalNeeded);
@@ -196,6 +198,5 @@ HttpResponse handleDelete(const std::string& path, const ServerConfig& server)
     if (unlink(path.c_str()) == -1) {
 		return buildError(500, "Not found", server);
     }
-    makeUploadResponse(204, "Success", "");
-    return res;
+    return makeUploadResponse(204, "Success", "");
 }
