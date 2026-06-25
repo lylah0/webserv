@@ -252,6 +252,10 @@ void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
        // std::cerr << "[CGI CHILD] dup2(stdout) failed: " << strerror(errno) << "\n";
         _exit(1);
     }
+	if (dup2(outPipe[1], STDERR_FILENO) == -1) {
+       // std::cerr << "[CGI CHILD] dup2(stdout) failed: " << strerror(errno) << "\n";
+        _exit(1);
+    }
     close(inPipe[0]);
     close(outPipe[1]);
     std::string ext = getExtension(fullPath);

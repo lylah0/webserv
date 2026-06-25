@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/27 18:26:25 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/10 16:11:07 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/24 19:51:10 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ struct LocationConfig {
 	bool								upload_enabled;
 	bool								autoindex;
 	bool								has_client_max_body_size;
+	bool								has_alias;
+	std::string							alias;
 	std::string							upload_store;
 	std::string							path;
 	std::string							root;

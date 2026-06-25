@@ -63,6 +63,7 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
     loc.upload_enabled = false;
     loc.has_client_max_body_size = false;
     loc.client_max_body_size = 0;
+	loc.has_alias = false;
 
     if (tokens[i] != "location")
         throw std::runtime_error("Expected 'location'");
@@ -118,6 +119,7 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
         else if (key == "autoindex") loc.autoindex = (value == "on");
         else if (key == "return") continue;
         else if (key == "client_max_body_size") continue;
+		else if (key == "alias") loc.index = value;
 		else
             throw std::runtime_error("Unknown directive in location: " + key);
     }

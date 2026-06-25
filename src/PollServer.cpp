@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/24 01:24:10 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:23:43 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -474,7 +474,7 @@ bool PollServer::_buildFinalRequest(ClientConnection *client, ClientState &state
         if (headerEnd == std::string::npos)
             return false;
         request = parseRequest(buf.substr(0, headerEnd + 4), headerEnd + 4, 0);
-        request.body = state.body;
+        request.body.swap(state.body);
         consumed = state.pos;
     }
     else {
@@ -514,7 +514,8 @@ bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState 
     std::string ext = getExtension(test_path);
     const LocationConfig* extLocPtr = findExtensionLocation(_clientConfig[clientFd], request.uri, test_path, ext);
     const LocationConfig& extLoc = (extLocPtr ? *extLocPtr : loc);
-    std::string path = resolvePath(request, extLoc);
+	// std::string path = resolvePath(request, extLoc);
+    std::string path = extLoc.root + request.uri;
     std::cerr << "PATH RESOLVED AS : " << path << std::endl;
     std::cerr << "CGI LOCATION BLOCK CHOSEN : " << extLoc.path << std::endl;
     std::cerr << "CGI LOCATION BLOCK DEFAULT : " << loc.path << std::endl;

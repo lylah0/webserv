@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 18:18:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/23 21:40:48 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/24 20:25:19 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,12 +103,16 @@ std::string resolvePath(const HttpRequest &req, const LocationConfig &loc)
         else
             remainder = uri;
     }
-
     if (remainder.empty() || remainder[0] != '/')
-        remainder = "/" + remainder;
+	remainder = "/" + remainder;
 
     std::string path = root + remainder;
 
+    // std::string remainder = uri;
+    // if (remainder.empty() || remainder[0] != '/')
+    //     remainder = "/" + remainder;
+
+    // std::string path = root + remainder;
     struct stat st;
     if (stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode)) {
         if (!loc.index.empty()) {
@@ -117,7 +121,6 @@ std::string resolvePath(const HttpRequest &req, const LocationConfig &loc)
             path += loc.index;
         }
     }
-
     return path;
 }
 
