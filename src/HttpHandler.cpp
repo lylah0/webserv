@@ -222,8 +222,6 @@ HttpRequest parseRequest(const std::string &buffer,
     std::string key, value, line;
 
     std::istringstream stream(buffer);
-    //std::cerr << "[PARSE] First line raw: "
-      //        << buffer.substr(0, buffer.find("\r\n")) << "\n";
     stream >> req.method >> req.uri >> req.version;
     std::getline(stream, line);
 
@@ -257,8 +255,6 @@ std::string getMimeType(const std::string &path)
         return "application/octet-stream";
 
     std::string ext = path.substr(dot + 1);
-    //std::cout << "Extension : " << ext << "\n";
-
 	if (ext == "html") return "text/html";
 	if (ext == "css")  return "text/css";
 	if (ext == "js")   return "application/javascript";
@@ -316,7 +312,6 @@ HttpResponse execute(const HttpRequest &req,
     if (!allowed)
         return (buildError(405, "Not allowed", server));
     std::string path = resolvePath(req, loc, server);
-    std::cerr << "PATH : " << path << std::endl;
     if (req.method == "GET")
         return handleGet(loc, path, server);
     else if (req.method == "POST")

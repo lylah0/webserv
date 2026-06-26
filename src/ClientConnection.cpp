@@ -42,7 +42,6 @@ void ClientConnection::eraseReadBytes(size_t n)
 
 void ClientConnection::appendToReadBuffer(const char* data, size_t len)
 {
-    //std::cerr << "\nERROR : append error found here\n" << std::endl;
     _readBuffer.append(data, len);
 }
 
@@ -102,20 +101,6 @@ bool ClientConnection::handleWrite() {
     const std::string &buf = _responseQueue.front();
     const char *data = buf.c_str() + _writeOffset;
     size_t rest = buf.size() - _writeOffset;
-    /*if (_writeOffset == 0) { // only check at the start of sending
-        if (buf.find("404 Not Found") != std::string::npos ||
-            buf.find("HTTP/1.1 404") != std::string::npos)
-        {
-            std::cerr << "[DEBUG 404] WIRE OUT:\n";
-            std::cerr << std::string(data, rest) << "\n";
-        }
-        else if (buf.find("504 Gateway Timeout") != std::string::npos ||
-            buf.find("HTTP/1.1 504") != std::string::npos)
-        {
-            std::cerr << "[DEBUG 504] WIRE OUT:\n";
-            std::cerr << std::string(data, rest) << "\n";
-        }
-    }*/
     ssize_t sent = send(_fd, data, rest, 0);
     if (sent > 0)
     {
@@ -151,9 +136,6 @@ void ClientConnection::prepResponse(const HttpResponse &response)
         out << it->first << ": " << it->second << "\r\n";
     out << "\r\n";
     out << response.body;
-    //if (response.statusCode == 404)
-        //std::cerr << "[DEBUG] PREPRESPONSE ENQUEUED RESPONSE : \n" << out.str() << std::endl;
-    //std::cerr << "[DEBUG] printing headers : HTTP/1.1 " << response.statusCode << std::endl;
     enqueueResponse(out.str());
 }
 

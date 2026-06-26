@@ -7,8 +7,8 @@
 
 URL="${1:-http://localhost:8080/directory/youpi.bla}"
 PAYLOAD="${2:-payload_100mb.bin}"
-WORKERS=1
-TIMES=1
+WORKERS=5
+TIMES=20
 
 if [ ! -f "$PAYLOAD" ]; then
     echo "Fichier introuvable : $PAYLOAD"
@@ -29,7 +29,7 @@ worker() {
     for i in $(seq 1 $TIMES); do
         # -s silencieux, -o /dev/null jette le corps de réponse,
         # -w affiche le code HTTP, --fail-with-body pour voir les erreurs
-        code=$(curl -s -o /dev/null -w "%{http_code}" \
+        code=$(curl -s -v -o /dev/null -w "%{http_code}" \
                     --max-time 60 \
                     --fail-with-body \
                     -X POST \

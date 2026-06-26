@@ -85,8 +85,6 @@ void PollServer::registerCGI(int clientFd, CGIProcess &cgi) {
     _cgiProcesses[clientFd] = cgi;
     _pipeToClient[cgi.outFd] = clientFd;
     _addFd(cgi.outFd, POLLIN);
-
-    //std::cerr << "CGI REGISTERED" << std::endl;
     if (!cgi.inputDone) {
         _pipeToClient[cgi.inFd] = clientFd;
         _addFd(cgi.inFd, POLLOUT);
@@ -99,18 +97,15 @@ void PollServer::registerCGI(int clientFd, CGIProcess &cgi) {
 void PollServer::_handleCGIWrite(int pipeFd)
 {
     std::map<int,int>::iterator itClient = _pipeToClient.find(pipeFd);
-    //std::cerr << "CGI HANDLEWRITE CALLED" << std::endl;
     if (itClient == _pipeToClient.end())
         return;
 
     int clientFd = itClient->second;
     CGIProcess &cgi = _cgiProcesses[clientFd];
-
     if (cgi.inputDone) {
         _removeFd(pipeFd);
         return;
     }
-
     const std::string &buf = cgi.inputBuffer;
     size_t remaining = buf.size() - cgi.inputOffset;
     if (remaining == 0) {
@@ -120,19 +115,16 @@ void PollServer::_handleCGIWrite(int pipeFd)
         return;
     }
     ssize_t n = write(pipeFd, buf.data() + cgi.inputOffset, remaining);
-    //std::cerr << "[CGI WRITE] write returned " << n << "\n";
     if (n > 0) {
         cgi.inputOffset += n;
-        if (cgi.inputOffset >= buf.size()) {
+        if (cgi.inputOffset == buf.size()) {
             close(cgi.inFd);
             cgi.inputDone = true;
             _removeFd(pipeFd);
         }
         return;
     }
-    close(cgi.inFd);
-    cgi.inputDone = true;
-    _removeFd(pipeFd);
+    return;
 }
 
 bool PollServer::decodeChunkedBody(ClientConnection* client, ClientState& state)
@@ -140,14 +132,10 @@ bool PollServer::decodeChunkedBody(ClientConnection* client, ClientState& state)
     const std::string& buf = client->getReadBuffer();
     if (state.pos == 0) {
         size_t headerEnd = buf.find("\r\n\r\n");
-        if (headerEnd == std::string::npos) {
-            //DBG("waiting for header end");
+        if (headerEnd == std::string::npos)
             return false;
-        }
         state.pos = headerEnd + 4;
-        //DBG2("init pos", state.pos);
     }
-
     while (true)
     {
         if (state.haveChunkSize && state.currentChunkSize == 0)
@@ -155,14 +143,11 @@ bool PollServer::decodeChunkedBody(ClientConnection* client, ClientState& state)
             while (true)
             {
                 size_t lineEnd = buf.find("\r\n", state.pos);
-                if (lineEnd == std::string::npos) {
-                    //DBG("waiting for final CRLF or trailer line");
+                if (lineEnd == std::string::npos)
                     return false;
-                }
                 if (lineEnd == state.pos) {
                     state.pos += 2;
                     state.requestReady = true;
-                    //DBG("final chunk reached, body complete (trailers done)");
                     return true;
                 }
                 std::string trailer = buf.substr(state.pos, lineEnd - state.pos);
@@ -175,57 +160,38 @@ bool PollServer::decodeChunkedBody(ClientConnection* client, ClientState& state)
             if (lineEnd == std::string::npos) {
                 return false;
             }
-
             std::string hex = buf.substr(state.pos, lineEnd - state.pos);
             if (hex.empty()) {
-                //DBG("empty line before chunk-size, skipping");
                 state.pos = lineEnd + 2;
                 continue;
             }
             state.currentChunkSize = strtol(hex.c_str(), NULL, 16);
             state.haveChunkSize = true;
-            //DBG2("chunk-size", hex);
-            //DBG2("chunk-size-dec", state.currentChunkSize);
             state.pos = lineEnd + 2;
-            if (state.currentChunkSize == 0) {
-                //DBG("entered final-chunk mode (size 0)");
+            if (state.currentChunkSize == 0)
                 continue;
-            }
         }
-        if (state.currentChunkSize == 0) {
-            //DBG("BUG: entered data branch with size 0 — forcing final-chunk mode");
+        if (state.currentChunkSize == 0)
             continue;
-        }
-
-        if (buf.size() < state.pos + state.currentChunkSize) {
-            //DBG("waiting for chunk data");
+        if (buf.size() < state.pos + state.currentChunkSize)
             return false;
-        }
-        //DBG2("append-bytes", state.currentChunkSize);
         state.body.append(buf.substr(state.pos, state.currentChunkSize));
         state.bodyBytesRead += state.currentChunkSize;
         state.pos += state.currentChunkSize;
         state.haveChunkSize = false;
-        //DBG("chunk data complete, treating next bytes as start of next size line");
     }
 }
 
 void PollServer::_handleCGIRead(int pipeFd)
 {
     std::map<int,int>::iterator itClient = _pipeToClient.find(pipeFd);
-    //std::cerr << "CGI HANDLEREAD CALLED" << std::endl;
     if (itClient == _pipeToClient.end())
         return;
     int clientFd = itClient->second;
     CGIProcess &cgi = _cgiProcesses[clientFd];
     char buf[4096];
     ssize_t n = read(pipeFd, buf, sizeof(buf));
-    //std::cerr << "\n[CGI_READ] SIZE OF BUFFER READING PIPEFD OUT N : " << n << std::endl;
     if (n > 0) {
-        /*size_t preview = (n > 200 ? 200 : n);
-        std::cerr << "data_preview (" << preview << " bytes):\n";
-        std::cerr << std::string(buf, preview) << "\n";
-        std::cerr << "--- END PREVIEW ---\n";*/
         cgi.outputBuffer.append(buf, n);
         return;
     }
@@ -234,7 +200,6 @@ void PollServer::_handleCGIRead(int pipeFd)
     cgi.outputDone = true;
     int status;
     pid_t r = waitpid(cgi.pid, &status, WNOHANG);
-    std::cerr << "[CGI PARENT] waitpid=" << r << "\n";
     if (r == 0)
         r = waitpid(cgi.pid, &status, 0);
 
@@ -260,7 +225,6 @@ void PollServer::_handleCGIRead(int pipeFd)
         if (res.statusCode == 500)
             res = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
     }
-    //std::cerr << "[CGI READ] n=" << n << "\n";
     std::string().swap(outputBuffer);
     ClientConnection *client = _clients[clientFd];
     client->prepResponse(res);
@@ -269,7 +233,6 @@ void PollServer::_handleCGIRead(int pipeFd)
 
 void PollServer::_finishCGI(int clientFd) {
     std::map<int, CGIProcess>::iterator it = _cgiProcesses.find(clientFd);
-    //std::cerr << "CGI FINISHED" << std::endl;
     if (it == _cgiProcesses.end())
         return;
     pid_t pid  = it->second.pid;
@@ -295,7 +258,6 @@ void PollServer::_finishCGI(int clientFd) {
 
 void PollServer::_abortCGI(int clientFd) {
     std::map<int, CGIProcess>::iterator it = _cgiProcesses.find(clientFd);
-    //std::cerr << "CGI ABORTED" << std::endl;
     if (it == _cgiProcesses.end())
         return;
     pid_t pid   = it->second.pid;
@@ -323,10 +285,6 @@ void PollServer::_abortCGI(int clientFd) {
     _enableWrite(clientFd);
 }
 
-/*	Orchestre le traitement d'un client prêt en lecture/écriture.
-	Lit le socket, ferme proprement si déconnexion, puis enchaine
-	parsing headers -> assemblage body -> dispatch. Sort tot (return a poll)
-	des qu'une etape signale qu'il manque des donnees ou qu'une reponse est deja en file. */
 void PollServer::_clientEvent(size_t index)
 {
     int clientFd = _fds[index].fd;
@@ -347,9 +305,6 @@ void PollServer::_clientEvent(size_t index)
     _dispatchRequest(clientFd, client, state);
 }
 
-/*Nettoie et ferme un client deconnecte : abort du CGI eventuel,
- suppression de ses entrees dans les maps (_clients, _states, _clientConfig),
- retrait du fd de poll et close().*/
 void PollServer::_handleDisconnect(int clientFd)
 {
     _abortCGI(clientFd);
@@ -360,10 +315,7 @@ void PollServer::_handleDisconnect(int clientFd)
     _removeFd(clientFd);
     close(clientFd);
 }
-/*	Parse la ligne de requete + les headers une fois "\r\n\r\n" recu.
-	Determine le mode du body (chunked via Transfer-Encoding, sinon Content-Length),
-	fixe maxBodySize depuis la route, et rejette tot (413) si Content-Length depasse.
-	Retourne false si headers incomplets (on attend plus de donnees) ou si une erreur a ete envoyee.*/
+
 bool PollServer::_parseHeaders(int clientFd, ClientConnection *client, ClientState &state){
     if (state.headersComplete)
         return true;
@@ -456,17 +408,12 @@ bool PollServer::_assembleBody(int clientFd, ClientConnection *client, ClientSta
     return true;
 }
 
-
-/*	Aiguille une requete complete : construit le HttpRequest final,
-	resout la route, puis tente redirection -> CGI -> sinon execute() classique.
-	Prepare la reponse et active l'ecriture (POLLOUT).*/
 void PollServer::_dispatchRequest(int clientFd, ClientConnection *client, ClientState &state)
 {
     HttpRequest request;
     if (!_buildFinalRequest(client, state, request))
         return;
     LocationConfig loc = route(request, _clientConfig[clientFd]);
-    std::cerr << "ROUTE CALLED HERE : " << loc.path << std::endl;
     if (_handleRedirect(clientFd, client, state, loc))
         return;
     if (_handleCGI(clientFd, client, state, request, loc))
@@ -478,10 +425,6 @@ void PollServer::_dispatchRequest(int clientFd, ClientConnection *client, Client
     state = ClientState();
 }
 
-/*	Reconstruit le HttpRequest final a partir du buffer.
-	Cas chunked : re-parse les headers seuls et rattache le body deja decode.
-	Cas normal : parseRequestFromBuffer. Consomme les octets traites (popReadBytes).
-	Retourne false si le parsing echoue.*/
 bool PollServer::_buildFinalRequest(ClientConnection *client, ClientState &state, HttpRequest &request)
 {
     const std::string &buf = client->getReadBuffer();
@@ -504,9 +447,6 @@ bool PollServer::_buildFinalRequest(ClientConnection *client, ClientState &state
     return true;
 }
 
-/*	Traite une redirection si la route en definit une (301 Moved Permanently).
-	Prepare la reponse, active l'ecriture, reset l'etat. Retourne true si une
-	redirection a ete emise, false sinon (la requete continue son chemin normal).*/
 bool PollServer::_handleRedirect(int clientFd, ClientConnection *client, ClientState &state, const LocationConfig &loc)
 {
     if (loc.redirect.empty())
@@ -529,17 +469,12 @@ bool PollServer::_handleRedirect(int clientFd, ClientConnection *client, ClientS
 bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState &state, const HttpRequest &request, const LocationConfig &loc)
 {
     std::string test_path = resolvePath(request, loc, _clientConfig[clientFd]);
-    std::cerr << "RESOLVEPATH : " << test_path << std::endl;
     std::string ext = getExtension(test_path);
     const LocationConfig* extLocPtr = findExtensionLocation(_clientConfig[clientFd], request.uri, test_path, ext);
     const LocationConfig& extLoc = (extLocPtr ? *extLocPtr : loc);
     std::string path = resolvePath(request, loc, _clientConfig[clientFd]);
-    std::cerr << "PATH RESOLVED AS : " << path << std::endl;
-    std::cerr << "CGI LOCATION BLOCK CHOSEN : " << extLoc.path << std::endl;
-    std::cerr << "CGI LOCATION BLOCK DEFAULT : " << loc.path << std::endl;
     if (!isCGIvalid(extLoc, ext, request.method) || (request.method != "GET" && request.method != "POST"))
         return false;
-    std::cerr << "[CGI] validation check" << std::endl;
     std::string isvalid = CGI_validation_check(path);
     if (isvalid != "CGI validated" && isvalid != "Non CGI"){
         HttpResponse response;
@@ -587,7 +522,6 @@ void PollServer::runServer() {
              it != _cgiProcesses.end(); ) {
             if (now - it->second.startTime > 60) {
                 int clientFd = it->first;
-                std::cerr << "[CGI] Timeout for client fd=" << clientFd << "\n";
                 ++it;
                 _abortCGI(clientFd);
             } else {
@@ -678,7 +612,6 @@ void PollServer::runServer() {
                     client->popResponse();
                     if (_states[fd].closeAfterWrite) {
                         _abortCGI(fd);
-                        //std::cerr << "CGI ABORTED RIGHT HERE AFTER CHECKING WRITECOMPLETE" << std::endl;
                         delete client;
                         _clients.erase(fd);
                         _states.erase(fd);
@@ -704,7 +637,6 @@ void PollServer::runServer() {
             if (revents & (POLLERR | POLLHUP)) {
                 if (_clients.find(fd) != _clients.end()) {
                     _abortCGI(fd);
-                    //std::cerr << "CGI ABORTED RIGHT HERE AFTER CHECKING POLLHUP" << std::endl;
                     delete _clients[fd];
                     _clients.erase(fd);
                     _states.erase(fd);

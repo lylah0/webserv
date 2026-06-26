@@ -18,8 +18,6 @@ HttpResponse buildError(int code, const std::string &message, const ServerConfig
     HttpResponse response;
     std::ostringstream oss;
 
-    std::cerr << "[ERROR] Error Message : " << message << std::endl;
-
     response.statusCode    = code;
     response.statusMessage = message;
     response.headers["Content-Type"] = "text/html";
@@ -76,13 +74,8 @@ bool parseRequestFromBuffer(const std::string &buf, HttpRequest &outReq, size_t 
 
     size_t totalNeeded = headerEnd + contentLength;
     if (buf.size() < totalNeeded)
-    {
-        std::cerr << "BUFFER SIZE COMPARED TO TOTALNEEDED" << buf.size() << " | " << totalNeeded << std::endl;
-        std::cerr << "BUFFER HERE : " << buf << std::endl;
         return false;
-    }
     std::string requestSlice = buf.substr(0, totalNeeded);
-    //std::cerr << "[DEBUG] Request buffer recieved : " << buf << std::endl;
     outReq = parseRequest(requestSlice, headerEnd, contentLength);
     consumed = totalNeeded;
     return true;
