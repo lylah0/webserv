@@ -7,8 +7,8 @@
 
 URL="${1:-http://localhost:8080/directory/youpi.bla}"
 PAYLOAD="${2:-payload_100mb.bin}"
-WORKERS=5
-TIMES=20
+WORKERS=20
+TIMES=5
 
 if [ ! -f "$PAYLOAD" ]; then
     echo "Fichier introuvable : $PAYLOAD"

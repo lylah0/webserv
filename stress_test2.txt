@@ -1,0 +1,787 @@
+=== Stress test ===
+URL        : http://localhost:8080/directory/youpi.bla
+Payload    : payload_100mb.bin (100000000 octets)
+Workers    : 20 en parallèle
+Itérations : 5 par worker
+===================
+[worker 3 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+[worker 5 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+* Closing connection 0
+[worker 13 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 15 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 11 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+[worker 7 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+* Closing connection 0
+[worker 4 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 1 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 20 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 12 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 14 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 17 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 9 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 18 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 2 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 16 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 6 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 10 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 8 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 19 iter 1] ECHEC curl (rc=52) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Empty reply from server
+* Closing connection 0
+[worker 14 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 2 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 2 ms: Connection refused
+* Closing connection 0
+[worker 5 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 1 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 20 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 11 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 9 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 13 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 7 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 10 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 16 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 4 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 12 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 17 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 3 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 8 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 15 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 3 ms: Connection refused
+* Closing connection 0
+[worker 6 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 14 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 19 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 6 ms: Connection refused
+* Closing connection 0
+[worker 1 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 18 iter 2] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 20 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 2 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 16 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 4 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+[worker 5 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+* Closing connection 0
+[worker 15 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+[worker 13 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+* Closing connection 0
+[worker 12 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 7 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 11 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 7 ms: Connection refused
+* Closing connection 0
+[worker 6 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 9 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 17 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 3 ms: Connection refused
+* Closing connection 0
+[worker 10 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 5 ms: Connection refused
+* Closing connection 0
+[worker 19 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 1 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 8 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 18 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 3 iter 3] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 16 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 5 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 14 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 4 ms: Connection refused
+* Closing connection 0
+[worker 7 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 9 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 13 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 2 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 20 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 4 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 17 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 12 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 4 ms: Connection refused
+* Closing connection 0
+[worker 15 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 2 ms: Connection refused
+* Closing connection 0
+[worker 11 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 8 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 1 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 3 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 19 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 1 ms: Connection refused
+* Closing connection 0
+[worker 18 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 6 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 10 iter 4] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 16 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 9 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 4 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 5 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 2 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 14 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 8 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 7 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 15 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+[worker 13 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+[worker 12 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+* Closing connection 0
+* Closing connection 0
+[worker 20 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 11 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 19 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 17 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 6 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 3 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 10 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+[worker 18 iter 5] ECHEC curl (rc=7) : *   Trying 127.0.0.1:8080...
+* connect to 127.0.0.1 port 8080 failed: Connection refused
+*   Trying ::1:8080...
+* connect to ::1 port 8080 failed: Connection refused
+* Failed to connect to localhost port 8080 after 0 ms: Connection refused
+* Closing connection 0
+=== Terminé ===

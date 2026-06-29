@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/29 15:32:07 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/29 16:31:02 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,7 @@ void PollServer::_handleCGIWrite(int pipeFd)
         return;
     }
     ssize_t n = write(pipeFd, buf.data() + cgi.inputOffset, remaining);
+	// std::cerr << "[CGI WRITE] n=" << n << " offset=" << cgi.inputOffset << "/" << buf.size() << std::endl;
     if (n > 0) {
         cgi.inputOffset += n;
         if (cgi.inputOffset == buf.size()) {
@@ -211,6 +212,9 @@ void PollServer::_handleCGIRead(int pipeFd)
     if (_clients.find(clientFd) == _clients.end())
         return;
     bool scriptFailed = (r > 0 && WIFEXITED(status) && WEXITSTATUS(status) != 0) || (r > 0 && WIFSIGNALED(status));
+	std::cerr << "[CGI EXIT] WIFEXITED=" << WIFEXITED(status)
+          << " code=" << (WIFEXITED(status) ? WEXITSTATUS(status) : -1)
+          << " signaled=" << WIFSIGNALED(status) << std::endl;
     HttpResponse res;
     if (scriptFailed || outputBuffer.empty())
     {
@@ -476,7 +480,7 @@ bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState 
     std::string ext = getExtension(test_path);
     const LocationConfig* extLocPtr = findExtensionLocation(_clientConfig[clientFd], request.uri, test_path, ext);
     const LocationConfig& extLoc = (extLocPtr ? *extLocPtr : loc);
-    std::string path = resolvePath(request, loc, _clientConfig[clientFd]);
+    std::string path = resolvePath(request, extLoc, _clientConfig[clientFd]);
     if (!isCGIvalid(extLoc, ext, request.method) || (request.method != "GET" && request.method != "POST"))
         return false;
     std::string isvalid = CGI_validation_check(path);
@@ -496,6 +500,7 @@ bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState 
         state.closeAfterWrite = true;
         return true;
     }
+	std::cerr << "[CGI] path passe a launchCGI = " << path << std::endl;
     if (isvalid == "CGI validated"){
         try {
             CGIProcess cgi = launchCGI(request, _clientConfig[clientFd], extLoc, path);
@@ -519,135 +524,173 @@ void PollServer::addServer(ServerConfig const &server) {
     _addFd(_servers.back()->getFd());
 }
 
-void PollServer::runServer() {
-    while (1) {
-        time_t now = time(NULL);
-        for (std::map<int, CGIProcess>::iterator it = _cgiProcesses.begin();
-             it != _cgiProcesses.end(); ) {
-            if (now - it->second.startTime > 60) {
-                int clientFd = it->first;
-                ++it;
-                _abortCGI(clientFd);
-            } else {
-                ++it;
+/**
+ * @brief Detruit completement un client : avorte son CGI eventuel, libere
+ *        l'objet, retire ses entrees des maps, l'enleve de poll et ferme le fd.
+ * @param fd Le descripteur du client a nettoyer (doit exister dans _clients).
+ */
+void PollServer::_cleanupClient(int fd) {
+    _abortCGI(fd);
+    delete _clients[fd];
+    _clients.erase(fd);
+    _states.erase(fd);
+    _clientConfig.erase(fd);
+    _removeFd(fd);
+    close(fd);
+}
+
+/**
+ * @brief Envoie la reponse en attente au client et gere la fin d'ecriture
+ *        (fermeture si demandee, reponses suivantes, ou reset pour keep-alive).
+ * @param fd Le descripteur du client pret en ecriture.
+ * @return true si le client a ete supprime (l'appelant doit passer au fd
+ *         suivant), false s'il faut continuer a traiter ce fd.
+ */
+bool PollServer::_handleClientWrite(int fd) {
+    if (_clients.find(fd) == _clients.end())
+        return true;
+    ClientConnection *client = _clients[fd];
+    if (!client->handleWrite()){
+        _cleanupClient(fd);
+        return true;
+    }
+    if (client->writeComplete()){
+        client->popResponse();
+        if (_states[fd].closeAfterWrite){
+            _cleanupClient(fd);
+            return true;
+        }
+        if (client->hasPendingResponses())
+            _enableWrite(fd);
+        else {
+            _disableWrite(fd);
+            if (client->getReadBuffer().empty()){
+                client->resetReadState();
+                client->clearWrite();
             }
         }
+    }
+    return false;
+}
+
+/**
+ * @brief Retrouve l'index du client dans _fds et declenche le traitement
+ *        de sa requete (lecture + parsing + dispatch) via _clientEvent.
+ * @param fd Le descripteur du client pret en lecture.
+ */
+void PollServer::_handleClientRead(int fd) {
+    for (size_t k = 0; k < _fds.size(); ++k){
+        if (_fds[k].fd == fd){
+            _clientEvent(k);
+            break;
+        }
+    }
+}
+
+/**
+ * @brief Indique si un descripteur correspond a une socket d'ecoute du serveur.
+ * @param fd Le descripteur a tester.
+ * @return true si fd est une socket serveur, false sinon.
+ */
+bool PollServer::_isServerFd(int fd) {
+    for (size_t j = 0; j < _servers.size(); ++j){
+        if (_servers[j]->getFd() == fd)
+            return true;
+    }
+    return false;
+}
+
+/**
+ * @brief Traite un evenement sur un pipe CGI (entree ou sortie).
+ *        Ecrit le body vers le CGI (POLLOUT sur inFd), lit sa sortie
+ *        (POLLIN sur outFd), ou recupere la sortie sur fermeture (POLLHUP).
+ * @param fd      Le descripteur du pipe ayant recu l'evenement.
+ * @param revents Les evenements signales par poll pour ce pipe.
+ */
+void PollServer::_handlePipeEvent(int fd, short revents) {
+    int clientFd = _pipeToClient[fd];
+    if (_cgiProcesses.find(clientFd) == _cgiProcesses.end())
+        return;
+    CGIProcess &cgi = _cgiProcesses[clientFd];
+    if (fd == cgi.inFd && (revents & POLLOUT))
+        _handleCGIWrite(fd);
+    else if (fd == cgi.outFd && (revents & POLLIN))
+        _handleCGIRead(fd);
+    else if (revents & (POLLERR | POLLHUP)){
+        if (fd == cgi.outFd)
+            _handleCGIRead(fd);
+    }
+}
+
+/**
+ * @brief Parcourt les process CGI en cours et avorte ceux qui depassent 60s,
+ *        pour eviter qu'un CGI bloque ne reste indefiniment.
+ */
+void PollServer::_checkCGITimeouts() {
+    time_t now = time(NULL);
+    for (std::map<int, CGIProcess>::iterator it = _cgiProcesses.begin();
+         it != _cgiProcesses.end(); ){
+        if (now - it->second.startTime > 60){
+            int clientFd = it->first;
+            ++it;
+            _abortCGI(clientFd);
+        }
+        else
+            ++it;
+    }
+}
+
+/**
+ * @brief Boucle principale du serveur : surveille tous les fds via poll() et
+ *        dispatche chaque evenement (pipe CGI, nouvelle connexion, client).
+ *        Tourne indefiniment.
+ */
+void PollServer::runServer() {
+    while (1) {
+        _checkCGITimeouts();
         int ret = poll(&_fds[0], _fds.size(), 1000);
         if (ret < 0)
             throw std::runtime_error("poll() failed");
         for (size_t i = 0; i < _fds.size(); ++i) {
             int   fd      = _fds[i].fd;
             short revents = _fds[i].revents;
-
             if (revents == 0)
                 continue;
             _fds[i].revents = 0;
             size_t sizeBefore = _fds.size();
-            if (_pipeToClient.find(fd) != _pipeToClient.end()) {
-				std::cerr << "[POLL] pipe fd=" << fd << " revents=" << revents << std::endl;
-                int clientFd = _pipeToClient[fd];
-                if (_cgiProcesses.find(clientFd) == _cgiProcesses.end())
-                    continue;
-                CGIProcess &cgi = _cgiProcesses[clientFd];
 
-                if (fd == cgi.inFd && (revents & POLLOUT)) {
-                    _handleCGIWrite(fd);
-                } else if (fd == cgi.outFd && (revents & POLLIN)) {
-                    _handleCGIRead(fd);
-                } else if (revents & (POLLERR | POLLHUP)) {
-                    if (fd == cgi.outFd)
-                        _handleCGIRead(fd);
-                }
-
+            if (_pipeToClient.find(fd) != _pipeToClient.end()){
+                _handlePipeEvent(fd, revents);
                 if (_fds.size() < sizeBefore)
                     i -= (sizeBefore - _fds.size());
                 continue;
             }
-
-            bool isServer = false;
-            for (size_t j = 0; j < _servers.size(); ++j) {
-                if (_servers[j]->getFd() == fd) {
-                    isServer = true;
-                    break;
-                }
-            }
-            if (isServer) {
+            if (_isServerFd(fd)){
                 if (revents & POLLIN)
                     _newConnection(fd);
                 continue;
             }
-
             if (_clients.find(fd) == _clients.end())
                 continue;
 
-            if (revents & POLLIN) {
-                for (size_t k = 0; k < _fds.size(); ++k) {
-                    if (_fds[k].fd == fd) {
-                        _clientEvent(k);
-                        break;
-                    }
-                }
-                if (_fds.size() < sizeBefore) {
+            if (revents & POLLIN){
+                _handleClientRead(fd);
+                if (_fds.size() < sizeBefore){
                     i -= (sizeBefore - _fds.size());
                     continue;
                 }
                 sizeBefore = _fds.size();
             }
-
-            if (revents & POLLOUT) {
-                if (_clients.find(fd) == _clients.end()) {
+            if (revents & POLLOUT){
+                if (_handleClientWrite(fd)){
                     if (_fds.size() < sizeBefore)
                         i -= (sizeBefore - _fds.size());
                     continue;
-                }
-                ClientConnection *client = _clients[fd];
-                if (!client->handleWrite()) {
-                    _abortCGI(fd);
-                    delete client;
-                    _clients.erase(fd);
-                    _states.erase(fd);
-                    _clientConfig.erase(fd);
-                    _removeFd(fd);
-                    close(fd);
-                    if (_fds.size() < sizeBefore)
-                        i -= (sizeBefore - _fds.size());
-                    continue;
-                }
-                if (client->writeComplete()) {
-                    client->popResponse();
-                    if (_states[fd].closeAfterWrite) {
-                        _abortCGI(fd);
-                        delete client;
-                        _clients.erase(fd);
-                        _states.erase(fd);
-                        _clientConfig.erase(fd);
-                        _removeFd(fd);
-                        close(fd);
-                        if (_fds.size() < sizeBefore)
-                            i -= (sizeBefore - _fds.size());
-                        continue;
-                    }
-                    if (client->hasPendingResponses()) {
-                        _enableWrite(fd);
-                    } else {
-                        _disableWrite(fd);
-                        if (client->getReadBuffer().empty()) {
-                            client->resetReadState();
-                            client->clearWrite();
-                        }
-                    }
                 }
             }
-
-            if (revents & (POLLERR | POLLHUP)) {
-                if (_clients.find(fd) != _clients.end()) {
-                    _abortCGI(fd);
-                    delete _clients[fd];
-                    _clients.erase(fd);
-                    _states.erase(fd);
-                    _clientConfig.erase(fd);
-                    _removeFd(fd);
-                    close(fd);
+            if (revents & (POLLERR | POLLHUP)){
+                if (_clients.find(fd) != _clients.end()){
+                    _cleanupClient(fd);
                     if (_fds.size() < sizeBefore)
                         i -= (sizeBefore - _fds.size());
                 }

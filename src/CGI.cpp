@@ -175,6 +175,13 @@ CGIEnv buildCGIEnv(const HttpRequest &req,
 
         env.httpHeaders["HTTP_" + key] = it->second;
     }
+	std::cerr << "[CGI ENV] SCRIPT_FILENAME=" << env.scriptFilename << std::endl;
+    std::cerr << "[CGI ENV] SCRIPT_NAME=" << env.scriptName << std::endl;
+    std::cerr << "[CGI ENV] CONTENT_LENGTH=" << env.contentLength << std::endl;
+    std::cerr << "[CGI ENV] CONTENT_TYPE=" << env.contentType << std::endl;
+    std::cerr << "[CGI ENV] QUERY_STRING=" << env.queryString << std::endl;
+    std::cerr << "[CGI ENV] PATH_INFO=" << env.pathInfo << std::endl;
+    std::cerr << "[CGI ENV] REQUEST_METHOD=" << env.requestMethod << std::endl;
     return env;
 }
 
@@ -314,7 +321,7 @@ CGIProcess launchCGI(const HttpRequest &req,
     int inPipe[2];
     int outPipe[2];
     if (pipe(inPipe) == -1 || pipe(outPipe) == -1) {
-        throw std::runtime_error("pipe() failed");
+		throw std::runtime_error("pipe() failed");
     }
     setNonBlocking(inPipe[1]);
     setNonBlocking(outPipe[0]);

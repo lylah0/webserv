@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 16:50:23 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/23 23:09:53 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/29 15:34:48 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class ServerSocket;
 
 class PollServer {
     private:
+
         std::vector<pollfd>                 _fds;
         std::vector<ServerSocket*>           _servers;
         std::map<int, ClientConnection*>    _clients;
@@ -50,15 +51,22 @@ class PollServer {
         void    _clientEvent(size_t index);
         void    _enableWrite(int fd);
         void    _disableWrite(int fd);
+		void	_checkCGITimeouts();
+		void	_cleanupClient(int fd);
 
+		void	_handlePipeEvent(int fd, short revents);
         void    _handleCGIWrite(int pipeFd);
         void    _handleCGIRead(int pipeFd);
         void    _finishCGI(int clientFd);
         void    _abortCGI(int clientFd);
+		void	_handleClientRead(int fd);
 
 		bool    decodeChunkedBody(ClientConnection* client, ClientState& state);
 		bool	_assembleBody(int clientFd, ClientConnection *client, ClientState &state);
 		bool	_parseHeaders(int clientFd, ClientConnection *client, ClientState &state);
+		bool	_isServerFd(int fd);
+		bool	_handleClientWrite(int fd);
+
 
     public:
         PollServer();

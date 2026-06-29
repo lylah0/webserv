@@ -1,0 +1,135 @@
+=== Stress test ===
+URL        : http://localhost:8080/directory/youpi.bla
+Payload    : payload_100mb.bin (100000000 octets)
+Workers    : 5 en parallèle
+Itérations : 20 par worker
+===================
+[worker 5 iter 1] HTTP 200
+[worker 4 iter 1] HTTP 200
+[worker 3 iter 1] HTTP 200
+[worker 2 iter 1] HTTP 200
+[worker 1 iter 1] HTTP 200
+[worker 5 iter 2] HTTP 200
+[worker 4 iter 2] HTTP 200
+[worker 3 iter 2] HTTP 200
+[worker 2 iter 2] HTTP 200
+[worker 1 iter 2] HTTP 200
+[worker 5 iter 3] HTTP 200
+[worker 4 iter 3] HTTP 200
+[worker 3 iter 3] HTTP 200
+[worker 1 iter 3] HTTP 200
+[worker 5 iter 4] HTTP 200
+[worker 4 iter 4] HTTP 200
+[worker 3 iter 4] HTTP 200
+[worker 1 iter 4] HTTP 200
+[worker 5 iter 5] HTTP 200
+[worker 4 iter 5] HTTP 200
+[worker 3 iter 5] HTTP 200
+[worker 1 iter 5] HTTP 200
+[worker 5 iter 6] HTTP 200
+[worker 4 iter 6] HTTP 200
+[worker 3 iter 6] HTTP 200
+[worker 1 iter 6] HTTP 200
+[worker 5 iter 7] HTTP 200
+[worker 4 iter 7] HTTP 200
+[worker 3 iter 7] HTTP 200
+[worker 1 iter 7] HTTP 200
+[worker 5 iter 8] HTTP 200
+[worker 4 iter 8] HTTP 200
+[worker 3 iter 8] HTTP 200
+[worker 1 iter 8] HTTP 200
+[worker 5 iter 9] HTTP 200
+[worker 4 iter 9] HTTP 200
+[worker 3 iter 9] HTTP 200
+[worker 1 iter 9] HTTP 200
+[worker 5 iter 10] HTTP 200
+[worker 3 iter 10] HTTP 200
+[worker 1 iter 10] HTTP 200
+[worker 5 iter 11] HTTP 200
+[worker 3 iter 11] HTTP 200
+[worker 1 iter 11] HTTP 200
+[worker 5 iter 12] HTTP 200
+[worker 3 iter 12] HTTP 200
+[worker 1 iter 12] HTTP 200
+[worker 5 iter 13] HTTP 200
+[worker 3 iter 13] HTTP 200
+[worker 1 iter 13] HTTP 200
+[worker 5 iter 14] HTTP 200
+[worker 3 iter 14] HTTP 200
+[worker 1 iter 14] HTTP 200
+[worker 5 iter 15] HTTP 200
+[worker 3 iter 15] HTTP 200
+[worker 1 iter 15] HTTP 200
+[worker 5 iter 16] HTTP 200
+[worker 3 iter 16] HTTP 200
+[worker 1 iter 16] HTTP 200
+[worker 5 iter 17] HTTP 200
+[worker 3 iter 17] HTTP 200
+[worker 1 iter 17] HTTP 200
+[worker 5 iter 18] HTTP 200
+[worker 3 iter 18] HTTP 200
+[worker 1 iter 18] HTTP 200
+[worker 5 iter 19] HTTP 200
+[worker 3 iter 19] HTTP 200
+[worker 1 iter 19] HTTP 200
+[worker 5 iter 20] HTTP 200
+[worker 3 iter 20] HTTP 200
+[worker 1 iter 20] HTTP 200
+[worker 2 iter 3] ECHEC curl (rc=28) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Operation timed out after 60001 milliseconds with 0 bytes received
+* Closing connection 0
+[worker 2 iter 4] HTTP 200
+[worker 2 iter 5] HTTP 200
+[worker 2 iter 6] HTTP 200
+[worker 2 iter 7] HTTP 200
+[worker 2 iter 8] HTTP 200
+[worker 2 iter 9] HTTP 200
+[worker 2 iter 10] HTTP 200
+[worker 2 iter 11] HTTP 200
+[worker 2 iter 12] HTTP 200
+[worker 2 iter 13] HTTP 200
+[worker 2 iter 14] HTTP 200
+[worker 2 iter 15] HTTP 200
+[worker 4 iter 10] ECHEC curl (rc=28) : *   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /directory/youpi.bla HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Length: 100000000
+> Content-Type: application/x-www-form-urlencoded
+> Expect: 100-continue
+> 
+* Done waiting for 100-continue
+} [65536 bytes data]
+* We are completely uploaded and fine
+* Operation timed out after 60001 milliseconds with 0 bytes received
+* Closing connection 0
+[worker 2 iter 16] HTTP 200
+[worker 4 iter 11] HTTP 200
+[worker 2 iter 17] HTTP 200
+[worker 4 iter 12] HTTP 200
+[worker 2 iter 18] HTTP 200
+[worker 4 iter 13] HTTP 200
+[worker 2 iter 19] HTTP 200
+[worker 4 iter 14] HTTP 200
+[worker 2 iter 20] HTTP 200
+[worker 4 iter 15] HTTP 200
+[worker 4 iter 16] HTTP 200
+[worker 4 iter 17] HTTP 200
+[worker 4 iter 18] HTTP 200
+[worker 4 iter 19] HTTP 200
+[worker 4 iter 20] HTTP 200
+=== Terminé ===
