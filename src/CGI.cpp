@@ -145,12 +145,12 @@ CGIEnv buildCGIEnv(const HttpRequest &req,
     std::map<std::string, std::string>::const_iterator ct = req.headers.find("Content-Type");
     std::string contentType = (ct != req.headers.end()) ? ct->second : "";
 
-    if (req.method == "POST" &&
-        queryStr.empty() &&
-        contentType.find("application/x-www-form-urlencoded") != std::string::npos)
-    {
-        queryStr = req.body;
-    }
+    // if (req.method == "POST" &&
+    //     queryStr.empty() &&
+    //     contentType.find("application/x-www-form-urlencoded") != std::string::npos)
+    // {
+    //     queryStr = req.body;
+    // }
     std::string pathInfo = req.uri;
     if (req.uri.size() > uriPath.size())
         pathInfo = req.uri.substr(uriPath.size());
@@ -262,7 +262,7 @@ void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
   //  std::cerr << "[CGI CHILD] ext=" << ext << "\n";
     std::map<std::string, std::string>::const_iterator it = loc.cgi.find(ext);
     if (it == loc.cgi.end()) {
-       // std::cerr << "[CGI CHILD] no interpreter for ext\n";
+       std::cerr << "[CGI CHILD] no interpreter for ext\n";
         _exit(1);
     }
     const char *interp = it->second.c_str();
@@ -275,7 +275,7 @@ void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
         scriptFile = fullPath.substr(lastSlash + 1);
     }
     if (chdir(scriptDir.c_str()) == -1) {
-     //   std::cerr << "[CGI CHILD] chdir failed: " << strerror(errno) << "\n";
+       std::cerr << "[CGI CHILD] chdir failed: " << strerror(errno) << "\n";
         _exit(1);
     }
   //  std::cerr << "[CGI CHILD] chdir to " << scriptDir << ", script=" << scriptFile << "\n";
@@ -317,10 +317,11 @@ void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
         std::cerr << " " << argv[i];
     }*/
     //std::cerr << " ENVP DEBUG SEEN ABOVE" << std::endl;
+	std::cerr << "[CGI CHILD] about to execve interp=" << interp << " script=" << scriptFile << " cwd=" << scriptDir << std::endl;
     execve(interp, argv, envp);
     //std::cerr << "[CGI CHILD] execve FAILED errno=" << errno
           //<< " (" << strerror(errno) << ")\n";
-    //std::cerr << "[CGI CHILD] execve FAILED: " << strerror(errno) << "\n";
+    std::cerr << "[CGI CHILD] execve FAILED: " << strerror(errno) << "\n";
     _exit(1);
 }
 

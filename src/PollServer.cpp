@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/25 14:23:43 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/25 16:20:24 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ void PollServer::_handleCGIWrite(int pipeFd)
         return;
     }
     ssize_t n = write(pipeFd, buf.data() + cgi.inputOffset, remaining);
-    //std::cerr << "[CGI WRITE] write returned " << n << "\n";
+    std::cerr << "[CGI WRITE] n=" << n << " offset=" << cgi.inputOffset << "/" << buf.size() << std::endl;
     if (n > 0) {
         cgi.inputOffset += n;
         if (cgi.inputOffset >= buf.size()) {
@@ -235,6 +235,8 @@ void PollServer::_handleCGIRead(int pipeFd)
     int status;
     pid_t r = waitpid(cgi.pid, &status, WNOHANG);
     std::cerr << "[CGI PARENT] waitpid=" << r << "\n";
+	if (r == 0)
+		r = waitpid(cgi.pid, &status, 0);
 
     std::string outputBuffer = cgi.outputBuffer;
     _pipeToClient.erase(pipeFd);
@@ -243,11 +245,21 @@ void PollServer::_handleCGIRead(int pipeFd)
     _cgiProcesses.erase(clientFd);
     if (_clients.find(clientFd) == _clients.end())
         return;
-    HttpResponse res = parseCGIOutput(outputBuffer);
-    if (res.statusCode == 500)
+    bool scriptFailed = (r > 0 && WIFEXITED(status) && WEXITSTATUS(status) != 0) || (r > 0 && WIFSIGNALED(status));
+    HttpResponse res;
+    std::cerr << "Output Buffer : " << outputBuffer << std::endl;
+    if (scriptFailed || outputBuffer.empty())
     {
-        //std::cerr << "[CGI] ERROR STATUS MESSAGE FOUND HERE : " << res.statusMessage << std::endl;
-        res = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
+        if (scriptFailed)
+            res = buildError(500, "Internal Server Error (Script Error)", _clientConfig[clientFd]);
+        else
+            res = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
+    }
+    else
+    {
+        res = parseCGIOutput(outputBuffer);
+        if (res.statusCode == 500)
+            res = buildError(500, "Internal Server Error", _clientConfig[clientFd]);
     }
     //std::cerr << "[CGI READ] n=" << n << "\n";
     ClientConnection *client = _clients[clientFd];
@@ -542,7 +554,9 @@ bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState 
     if (isvalid == "CGI validated"){
         try {
             CGIProcess cgi = launchCGI(request, _clientConfig[clientFd], extLoc, path);
+			std::cerr << "[CGI] body size avant launch = " << request.body.size() << std::endl;
             registerCGI(clientFd, cgi);
+			std::cerr << "[CGI] registered inFd=" << cgi.inFd << " outFd=" << cgi.outFd << " inputDone=" << cgi.inputDone << std::endl;
         } catch (...) {
             client->prepResponse(buildError(500, "Internal Server Error", _clientConfig[clientFd]));
             _enableWrite(clientFd);
@@ -592,6 +606,7 @@ void PollServer::runServer() {
             size_t sizeBefore = _fds.size();
 
             if (_pipeToClient.find(fd) != _pipeToClient.end()) {
+				std::cerr << "[POLL] pipe fd=" << fd << " revents=" << revents << std::endl;
                 int clientFd = _pipeToClient[fd];
                 if (_cgiProcesses.find(clientFd) == _cgiProcesses.end())
                     continue;
