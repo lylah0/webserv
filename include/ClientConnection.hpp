@@ -22,7 +22,6 @@
 # include <deque>
 # include <cstdlib>
 # include <stdint.h>
-# include <cerrno>
 # include <cstring>
 #  include "ServerConfig.hpp"
 # include "HttpResponse.hpp"

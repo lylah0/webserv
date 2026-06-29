@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 19:15:42 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/25 16:12:29 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/29 15:27:38 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ void ClientConnection::eraseReadBytes(size_t n)
 
 void ClientConnection::appendToReadBuffer(const char* data, size_t len)
 {
-    //std::cerr << "\nERROR : append error found here\n" << std::endl;
     _readBuffer.append(data, len);
 }
 
@@ -87,7 +86,11 @@ const std::string &ClientConnection::currentResponse() const {
 
 void ClientConnection::popResponse() {
     if (!_responseQueue.empty())
+    {
+        std::string &front = _responseQueue.front();
+        std::string().swap(front);
         _responseQueue.pop_front();
+    }
     _writeOffset = 0;
 }
 
@@ -98,27 +101,13 @@ bool ClientConnection::handleWrite() {
     const std::string &buf = _responseQueue.front();
     const char *data = buf.c_str() + _writeOffset;
     size_t rest = buf.size() - _writeOffset;
-    /*if (_writeOffset == 0) { // only check at the start of sending
-        if (buf.find("404 Not Found") != std::string::npos ||
-            buf.find("HTTP/1.1 404") != std::string::npos)
-        {
-            std::cerr << "[DEBUG 404] WIRE OUT:\n";
-            std::cerr << std::string(data, rest) << "\n";
-        }
-        else if (buf.find("504 Gateway Timeout") != std::string::npos ||
-            buf.find("HTTP/1.1 504") != std::string::npos)
-        {
-            std::cerr << "[DEBUG 504] WIRE OUT:\n";
-            std::cerr << std::string(data, rest) << "\n";
-        }
-    }*/
     ssize_t sent = send(_fd, data, rest, 0);
     if (sent > 0)
     {
         _writeOffset += static_cast<size_t>(sent);
         return true;
     }
-    if (sent == 0)
+    if (sent == 0 || sent < 0)
         return false;
     return true;
 }
@@ -129,6 +118,11 @@ bool ClientConnection::writeComplete() const {
 }
 
 void ClientConnection::clearWrite() {
+    for (std::deque<std::string>::iterator it = _responseQueue.begin();
+         it != _responseQueue.end(); ++it)
+    {
+        std::string().swap(*it);
+    }
     _responseQueue.clear();
     _writeOffset = 0;
 }
@@ -142,9 +136,6 @@ void ClientConnection::prepResponse(const HttpResponse &response)
         out << it->first << ": " << it->second << "\r\n";
     out << "\r\n";
     out << response.body;
-    //if (response.statusCode == 404)
-        //std::cerr << "[DEBUG] PREPRESPONSE ENQUEUED RESPONSE : \n" << out.str() << std::endl;
-    //std::cerr << "[DEBUG] printing headers : HTTP/1.1 " << response.statusCode << std::endl;
     enqueueResponse(out.str());
 }
 
@@ -184,7 +175,7 @@ bool ClientConnection::isRequestComplete() const {
 }
 
 void ClientConnection::resetReadState() {
-    _readBuffer.clear();
+    std::string().swap(_readBuffer);
     _headersParsed = false;
     _expectedLength = 0;
     _headerEnd = 0;

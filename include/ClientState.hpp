@@ -18,24 +18,15 @@
 struct ClientState {
     bool headersComplete;
     bool requestReady;
-
     size_t contentLength;
     bool isChunked;
-
-    // Body accumulation
     size_t bodyBytesRead;
     std::string body;
-
-    // Chunked decoding state
     bool haveChunkSize;
     size_t currentChunkSize;
-    size_t pos; // parsing cursor inside read buffer
-
-    // Error + connection control
+    size_t pos;
     bool chunkedError;
     bool closeAfterWrite;
-
-    // Location-based limit
     size_t maxBodySize;
 
     ClientState()

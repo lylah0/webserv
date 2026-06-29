@@ -107,7 +107,6 @@ LocationConfig parseLocation(const std::vector<std::string> &tokens, size_t &i)
             if (tokens[i] == ";")
                 throw std::runtime_error("Invalid client_max_body_size");
             loc.client_max_body_size = std::strtoul(tokens[i].c_str(), 0, 10);
-            //std::cerr << "client_max_body_size here : " << loc.client_max_body_size << std::endl;
             loc.has_client_max_body_size = true;
         }
         std::string value = tokens[i++];

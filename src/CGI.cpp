@@ -3,11 +3,11 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
-#include <fcntl.h>     // open, fcntl
-#include <unistd.h>    // write, close, execve
-#include <cstdio>      // sprintf
-#include <sys/types.h> // pid_t
-#include <sys/stat.h>  // open modes
+#include <fcntl.h>
+#include <unistd.h>
+#include <cstdio>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "ServerConfig.hpp"
@@ -92,14 +92,10 @@ bool isCGIvalid(const LocationConfig& extLoc,
                 const std::string& ext,
                 const std::string& method)
 {
-    if (extLoc.path.empty()) {
-        std::cerr << "[CGI] extLoc is NULL, not CGI" << std::endl;
+    if (extLoc.path.empty())
         return false;
-    }
-    if (ext.empty()) {
-        std::cerr << "[CGI] Empty extension, not CGI" << std::endl;
+    if (ext.empty())
         return false;
-    }
     bool methodAllowed = false;
     for (size_t i = 0; i < extLoc.methods.size(); i++) {
         if (extLoc.methods[i] == method) {
@@ -107,22 +103,17 @@ bool isCGIvalid(const LocationConfig& extLoc,
             break;
         }
     }
-    if (!methodAllowed) {
-        std::cerr << "[CGI] Method not allowed for this location" << std::endl;
+    if (!methodAllowed)
         return false;
-    }
     std::map<std::string, std::string>::const_iterator it = extLoc.cgi.find(ext);
-    if (it == extLoc.cgi.end() || it->second.empty()) {
-        std::cerr << "[CGI] No CGI interpreter for extension " << ext << std::endl;
+    if (it == extLoc.cgi.end() || it->second.empty())
         return false;
-    }
     return true;
 }
 
 std::string CGI_validation_check(const std::string& fullPath)
 {
     struct stat st;
-    std::cerr << "FULLPATH VARIABLE : " << fullPath << std::endl;
     if (stat(fullPath.c_str(), &st) < 0)
         return "File non existent";
     if (!S_ISREG(st.st_mode))
@@ -154,13 +145,11 @@ CGIEnv buildCGIEnv(const HttpRequest &req,
     std::string pathInfo = req.uri;
     if (req.uri.size() > uriPath.size())
         pathInfo = req.uri.substr(uriPath.size());
-    char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
     std::string host = req.headers.count("Host") ? req.headers.at("Host") : "";
     size_t colon = host.find(':');
     if (colon != std::string::npos)
         host = host.substr(0, colon);
-    env.scriptFilename = std::string(cwd) + "/" + fullPath;
+    env.scriptFilename   = fullPath;
     env.requestMethod    = req.method;
     env.requestUri       = req.uri;
     env.queryString      = queryStr;
@@ -186,25 +175,6 @@ CGIEnv buildCGIEnv(const HttpRequest &req,
 
         env.httpHeaders["HTTP_" + key] = it->second;
     }
-    /*std::cerr << "[CGI] ENV prepared:\n";
-    std::cerr << "  SCRIPT_FILENAME=" << env.scriptFilename << "\n";
-    std::cerr << "  SCRIPT_NAME=" << env.scriptName << "\n";
-    std::cerr << "  SERVER_PORT=" << env.serverPort << "\n";
-    std::cerr << "  GATEWAY_INTERFACE=" << env.gatewayInterface << "\n";
-    std::cerr << "  SERVER_NAME=" << env.serverName << "\n";
-    std::cerr << "  SERVER_PROTOCOL=" << env.serverProtocol << "\n";
-    std::cerr << "  REQUEST_METHOD=" << env.requestMethod << "\n";
-    std::cerr << "  REQUEST_URI=" << env.requestUri << "\n";
-    std::cerr << "  QUERY_STRING=" << env.queryString << "\n";
-    std::cerr << "  CONTENT_LENGTH=" << env.contentLength << "\n";
-    std::cerr << "  CONTENT_TYPE=" << env.contentType << "\n";
-    std::cerr << "  PATH_INFO=" << env.pathInfo << "\n";
-    std::cerr << "--- HTTP_ headers ---\n" << std::endl;*/
-    for (std::map<std::string,std::string>::const_iterator it = env.httpHeaders.begin();
-             it != env.httpHeaders.end(); ++it)
-        {
-            //std::cerr << it->first.c_str() << "=" << it->second.c_str() << std::endl;
-        }
     return env;
 }
 
@@ -241,32 +211,21 @@ char** buildENVP(const CGIEnv &env)
 void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
                  int inPipe[2], int outPipe[2], char** envp)
 {
-   // std::cerr << "[CGI CHILD] start, fullPath=" << fullPath << "\n";
     close(inPipe[1]);
     close(outPipe[0]);
-    if (dup2(inPipe[0], STDIN_FILENO) == -1) {
-      //  std::cerr << "[CGI CHILD] dup2(stdin) failed: " << strerror(errno) << "\n";
-        _exit(1);
-    }
-    if (dup2(outPipe[1], STDOUT_FILENO) == -1) {
-       // std::cerr << "[CGI CHILD] dup2(stdout) failed: " << strerror(errno) << "\n";
-        _exit(1);
-    }
-	if (dup2(outPipe[1], STDERR_FILENO) == -1) {
-       // std::cerr << "[CGI CHILD] dup2(stdout) failed: " << strerror(errno) << "\n";
-        _exit(1);
-    }
+    if (dup2(inPipe[0], STDIN_FILENO) == -1)
+        exit(1);
+    if (dup2(outPipe[1], STDOUT_FILENO) == -1)
+        exit(1);
+    if (dup2(outPipe[1], STDERR_FILENO) == -1)
+        exit(1);
     close(inPipe[0]);
     close(outPipe[1]);
     std::string ext = getExtension(fullPath);
-  //  std::cerr << "[CGI CHILD] ext=" << ext << "\n";
     std::map<std::string, std::string>::const_iterator it = loc.cgi.find(ext);
-    if (it == loc.cgi.end()) {
-       std::cerr << "[CGI CHILD] no interpreter for ext\n";
-        _exit(1);
-    }
+    if (it == loc.cgi.end())
+        exit(1);
     const char *interp = it->second.c_str();
-  //  std::cerr << "[CGI CHILD] interp=" << interp << "\n";
     std::string scriptDir  = ".";
     std::string scriptFile = fullPath;
     size_t lastSlash = fullPath.rfind('/');
@@ -274,55 +233,14 @@ void runCGIChild(const LocationConfig &loc, const std::string &fullPath,
         scriptDir  = fullPath.substr(0, lastSlash);
         scriptFile = fullPath.substr(lastSlash + 1);
     }
-    if (chdir(scriptDir.c_str()) == -1) {
-       std::cerr << "[CGI CHILD] chdir failed: " << strerror(errno) << "\n";
-        _exit(1);
-    }
-  //  std::cerr << "[CGI CHILD] chdir to " << scriptDir << ", script=" << scriptFile << "\n";
-
+    if (chdir(scriptDir.c_str()) == -1)
+        exit(1);
     char *argv[3];
     argv[0] = const_cast<char*>(interp);
     argv[1] = const_cast<char*>(scriptFile.c_str());
     argv[2] = NULL;
-
-    //int flags = fcntl(STDIN_FILENO, F_GETFL);
-    //std::cerr << "[CGI CHILD] stdin flags=" << flags << "\n";
-    //flags = fcntl(STDOUT_FILENO, F_GETFL);
-    //std::cerr << "[CGI CHILD] stdout flags=" << flags << "\n";
- //   std::cerr << "[CGI CHILD] execve()...\n";
-    //std::cerr << "[CGI CHILD] about to execve\n";
-    /*for (int i = 0; envp[i]; i++)
-    {
-        int fd = open("/tmp/cgi_env_debug.log",
-                    O_WRONLY | O_CREAT | O_APPEND,
-                    0644);
-
-        if (fd != -1) {
-            write(fd, "=== CGI CHILD ENV DEBUG ===\n", 29);
-
-            int i = 0;
-            while (envp[i]) {
-                write(fd, envp[i], strlen(envp[i]));
-                write(fd, "\n", 1);
-                i++;
-            }
-
-            write(fd, "============================\n\n", 30);
-            close(fd);
-        }
-    }*/
-    //std::cerr << "[CGI CHILD] EXECVE PERFORMED WITH : " << interp << " CGI ARGS : " << std::endl;
-    /*for (int i = 0; argv[i]; i++)
-    {
-        std::cerr << " " << argv[i];
-    }*/
-    //std::cerr << " ENVP DEBUG SEEN ABOVE" << std::endl;
-	std::cerr << "[CGI CHILD] about to execve interp=" << interp << " script=" << scriptFile << " cwd=" << scriptDir << std::endl;
     execve(interp, argv, envp);
-    //std::cerr << "[CGI CHILD] execve FAILED errno=" << errno
-          //<< " (" << strerror(errno) << ")\n";
-    std::cerr << "[CGI CHILD] execve FAILED: " << strerror(errno) << "\n";
-    _exit(1);
+    exit(1);
 }
 
 
@@ -332,19 +250,14 @@ HttpResponse parseCGIOutput(const std::string &raw)
 
     size_t pos = raw.find("\r\n\r\n");
     size_t sepLen = 4;
-
-    //std::cerr << "[DEBUG] CGI RAW OUTPUT : " << raw << std::endl;
-
     if (pos == std::string::npos) {
         pos = raw.find("\n\n");
         sepLen = 2;
     }
-
     if (pos == std::string::npos) {
         pos = raw.find("\r\r");
         sepLen = 2;
     }
-
     if (pos == std::string::npos) {
         res.statusCode = 200;
         res.statusMessage = "OK";
@@ -353,30 +266,22 @@ HttpResponse parseCGIOutput(const std::string &raw)
         res.headers["Content-Length"] = toString(res.body.size());
         return res;
     }
-
     std::string headerPart = raw.substr(0, pos);
     std::string bodyPart   = raw.substr(pos + sepLen);
-
     res.body = bodyPart;
-
     std::istringstream stream(headerPart);
     std::string line;
-
     while (std::getline(stream, line))
     {
         if (!line.empty() && line[line.size() - 1] == '\r')
             line.erase(line.size() - 1);
-
         size_t colon = line.find(':');
         if (colon == std::string::npos)
             continue;
-
         std::string key   = line.substr(0, colon);
         std::string value = line.substr(colon + 1);
-
         if (!value.empty() && value[0] == ' ')
             value.erase(0, 1);
-
         if (key == "Status")
         {
             std::istringstream ss(value);
@@ -388,18 +293,14 @@ HttpResponse parseCGIOutput(const std::string &raw)
 
             continue;
         }
-
         res.headers[key] = value;
     }
-
     if (res.statusCode < 200 || res.statusCode > 599) {
         res.statusCode = 200;
         res.statusMessage = "OK";
     }
-
     if (res.headers.find("Content-Length") == res.headers.end())
         res.headers["Content-Length"] = toString(res.body.size());
-
     return res;
 }
 
@@ -408,34 +309,28 @@ CGIProcess launchCGI(const HttpRequest &req,
                      const LocationConfig &loc,
                      const std::string &fullPath)
 {
-    //std::cerr << "\n[CGI] launchCGI() fullPath=" << fullPath << "\n";
-
     CGIEnv env = buildCGIEnv(req, server, fullPath);
     char** envp = buildENVP(env);
-
     int inPipe[2];
     int outPipe[2];
-
     if (pipe(inPipe) == -1 || pipe(outPipe) == -1) {
         throw std::runtime_error("pipe() failed");
     }
-
     setNonBlocking(inPipe[1]);
     setNonBlocking(outPipe[0]);
-
     pid_t pid = fork();
     if (pid < 0) {
         throw std::runtime_error("fork() failed");
     }
     if (pid == 0) {
         runCGIChild(loc, fullPath, inPipe, outPipe, envp);
+        _exit(1);
     }
-
-    //std::cerr << "[CGI] fork OK, pid=" << pid << "\n";
-
+    for (int i = 0; envp[i] != NULL; i++)
+        free(envp[i]);
+    delete[] envp;
     close(inPipe[0]);
     close(outPipe[1]);
-
     CGIProcess cgi;
     cgi.pid         = pid;
     cgi.inFd        = inPipe[1];
@@ -445,14 +340,5 @@ CGIProcess launchCGI(const HttpRequest &req,
     cgi.inputDone   = req.body.empty();
     cgi.outputDone  = false;
     cgi.startTime   = time(NULL);
-
-    /*std::cerr << "[CGI] launchCGI done:"
-              << " inputDone=" << cgi.inputDone
-              << " body_size=" << cgi.inputBuffer.size()
-              << " inFd=" << cgi.inFd
-              << " outFd=" << cgi.outFd
-              << "\n";*/
-
-    //std::cerr << "[CGI PARENT] child pid=" << cgi.pid << "\n";
     return cgi;
 }

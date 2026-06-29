@@ -39,7 +39,7 @@ LocationConfig	route(HttpRequest const &req, ServerConfig const &config);
 HttpResponse	handleGet(LocationConfig const &location, std::string path, ServerConfig const &config);
 HttpResponse	handlePost(const HttpRequest& request, const LocationConfig& location, const ServerConfig& server, const std::string& path);
 HttpResponse	handleDelete(const std::string& path, const ServerConfig& server);
-std::string		resolvePath(const HttpRequest &req, const LocationConfig &loc);
+std::string		resolvePath(const HttpRequest &req, const LocationConfig &loc, const ServerConfig &server);
 bool			parseRequestFromBuffer(const std::string &buf, HttpRequest &outReq, size_t &consumed);
 
 #endif
