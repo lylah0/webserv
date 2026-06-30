@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/30 13:58:03 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/30 14:05:27 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,6 @@ void PollServer::_handleCGIWrite(int pipeFd){
 		return;
 	}
 	ssize_t n = write(pipeFd, buf.data() + cgi.inputOffset, remaining);
-	// std::cerr << "[CGI WRITE] n=" << n << " offset=" << cgi.inputOffset << "/" << buf.size() << std::endl;
 	if (n > 0){
 		cgi.inputOffset += n;
 		if (cgi.inputOffset == buf.size()){
@@ -487,7 +486,6 @@ bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState 
 		state.closeAfterWrite = true;
 		return true;
 	}
-	std::cerr << "[CGI] path passe a launchCGI = " << path << std::endl;
 	if (isvalid == "CGI validated"){
 		try{
 			CGIProcess cgi = launchCGI(request, _clientConfig[clientFd], extLoc, path);
