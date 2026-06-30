@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 16:50:23 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/29 15:34:48 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/30 13:58:08 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class PollServer {
         std::map<int, ServerConfig>         _clientConfig;
         std::map<int, CGIProcess>           _cgiProcesses;
         std::map<int, int>                  _pipeToClient;
+		bool								_available;
 
         PollServer(const PollServer &src);
         PollServer& operator=(const PollServer &rhs);

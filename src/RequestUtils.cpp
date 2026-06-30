@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 16:31:11 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/29 18:49:57 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/30 14:03:19 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,6 @@ HttpResponse handlePost(const HttpRequest& request,
         if (bpos == std::string::npos)
             return buildError(400, "Missing boundary in Content-Type", server);
         std::string boundary = contentType.substr(bpos + 9);
-		std::cerr << "BOUDARY SIZE" << boundary.size() << std::endl;
         while (!boundary.empty()) {
             char c = boundary[boundary.size() - 1];
             if (c == '\r' || c == '\n' || c == ';' || c == ' ')

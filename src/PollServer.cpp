@@ -6,14 +6,13 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/29 20:46:42 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/30 13:58:03 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "PollServer.hpp"
-#define MAX_CONCURRENT_CGI 4
 
-PollServer::PollServer() {}
+PollServer::PollServer() : _available(false){}
 
 PollServer::~PollServer(){
 	for (std::map<int, ClientConnection *>::iterator it = _clients.begin();
@@ -490,13 +489,6 @@ bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState 
 	}
 	std::cerr << "[CGI] path passe a launchCGI = " << path << std::endl;
 	if (isvalid == "CGI validated"){
-		if (_cgiProcesses.size() >= MAX_CONCURRENT_CGI){
-			client->prepResponse(buildError(503, "Service Unavailable", _clientConfig[clientFd]));
-			_enableWrite(clientFd);
-			state = ClientState();
-			state.closeAfterWrite = true;
-			return true;
-		}
 		try{
 			CGIProcess cgi = launchCGI(request, _clientConfig[clientFd], extLoc, path);
 			registerCGI(clientFd, cgi);

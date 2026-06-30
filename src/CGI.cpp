@@ -136,12 +136,6 @@ CGIEnv buildCGIEnv(const HttpRequest &req,
     std::map<std::string, std::string>::const_iterator ct = req.headers.find("Content-Type");
     std::string contentType = (ct != req.headers.end()) ? ct->second : "";
 
-    // if (req.method == "POST" &&
-    //     queryStr.empty() &&
-    //     contentType.find("application/x-www-form-urlencoded") != std::string::npos)
-    // {
-    //     queryStr = req.body;
-    // }
     std::string pathInfo = req.uri;
     if (req.uri.size() > uriPath.size())
         pathInfo = req.uri.substr(uriPath.size());
@@ -175,13 +169,6 @@ CGIEnv buildCGIEnv(const HttpRequest &req,
 
         env.httpHeaders["HTTP_" + key] = it->second;
     }
-	std::cerr << "[CGI ENV] SCRIPT_FILENAME=" << env.scriptFilename << std::endl;
-    std::cerr << "[CGI ENV] SCRIPT_NAME=" << env.scriptName << std::endl;
-    std::cerr << "[CGI ENV] CONTENT_LENGTH=" << env.contentLength << std::endl;
-    std::cerr << "[CGI ENV] CONTENT_TYPE=" << env.contentType << std::endl;
-    std::cerr << "[CGI ENV] QUERY_STRING=" << env.queryString << std::endl;
-    std::cerr << "[CGI ENV] PATH_INFO=" << env.pathInfo << std::endl;
-    std::cerr << "[CGI ENV] REQUEST_METHOD=" << env.requestMethod << std::endl;
     return env;
 }
 
