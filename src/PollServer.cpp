@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/30 14:07:59 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/30 14:26:22 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,9 +207,6 @@ void PollServer::_handleCGIRead(int pipeFd){
 	if (_clients.find(clientFd) == _clients.end())
 		return;
 	bool scriptFailed = (r > 0 && WIFEXITED(status) && WEXITSTATUS(status) != 0) || (r > 0 && WIFSIGNALED(status));
-	std::cerr << "[CGI EXIT] WIFEXITED=" << WIFEXITED(status)
-			  << " code=" << (WIFEXITED(status) ? WEXITSTATUS(status) : -1)
-			  << " signaled=" << WIFSIGNALED(status) << std::endl;
 	HttpResponse res;
 	if (scriptFailed || outputBuffer.empty()){
 		if (scriptFailed)
