@@ -242,6 +242,7 @@ HttpResponse parseCGIOutput(const std::string &raw)
 {
     HttpResponse res;
 
+	res.statusCode = 0;
     size_t pos = raw.find("\r\n\r\n");
     size_t sepLen = 4;
     if (pos == std::string::npos) {

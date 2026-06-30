@@ -6,7 +6,7 @@
 /*   By: lylrandr <lylrandr@student.42lausanne.ch>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 17:49:36 by lylrandr          #+#    #+#             */
-/*   Updated: 2026/06/30 14:05:27 by lylrandr         ###   ########.fr       */
+/*   Updated: 2026/06/30 14:07:59 by lylrandr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -505,8 +505,9 @@ bool PollServer::_handleCGI(int clientFd, ClientConnection *client, ClientState 
 }
 
 void PollServer::addServer(ServerConfig const &server){
+	ServerSocket *sock = new ServerSocket(server);
 	_configs.push_back(server);
-	_servers.push_back(new ServerSocket(server));
+	_servers.push_back(sock);
 	_addFd(_servers.back()->getFd());
 }
 

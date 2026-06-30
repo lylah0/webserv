@@ -167,7 +167,6 @@ void ConfigParser::parseTokens(const std::vector<std::string> &tokens) {
 				continue;
 			}
             if (i >= tokens.size() || tokens[i] != ";"){
-				std::cout << tokens[i] << std::endl;
                 throw std::runtime_error("Expected ';'");
 			}
             ++i;
